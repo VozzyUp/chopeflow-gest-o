@@ -16,6 +16,8 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticated/produtos'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes/index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes/$id'
+import { Route as AuthenticatedMovimentacoesIndexRouteImport } from './routes/_authenticated/movimentacoes/index'
+import { Route as AuthenticatedMovimentacoesNovaRouteImport } from './routes/_authenticated/movimentacoes/nova'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +54,18 @@ const AuthenticatedClientesIdRoute = AuthenticatedClientesIdRouteImport.update({
   path: '/clientes/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMovimentacoesIndexRoute =
+  AuthenticatedMovimentacoesIndexRouteImport.update({
+    id: '/movimentacoes/',
+    path: '/movimentacoes/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMovimentacoesNovaRoute =
+  AuthenticatedMovimentacoesNovaRouteImport.update({
+    id: '/movimentacoes/nova',
+    path: '/movimentacoes/nova',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,7 +73,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
+  '/movimentacoes/': typeof AuthenticatedMovimentacoesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,7 +83,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
+  '/movimentacoes': typeof AuthenticatedMovimentacoesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,14 +95,31 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/produtos': typeof AuthenticatedProdutosRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
+  '/_authenticated/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
+  '/_authenticated/movimentacoes/': typeof AuthenticatedMovimentacoesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/dashboard' | '/produtos' | '/clientes/$id' | '/clientes/'
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/produtos'
+    | '/clientes/$id'
+    | '/movimentacoes/nova'
+    | '/clientes/'
+    | '/movimentacoes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/produtos' | '/clientes/$id' | '/clientes'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/produtos'
+    | '/clientes/$id'
+    | '/movimentacoes/nova'
+    | '/clientes'
+    | '/movimentacoes'
   id:
     | '__root__'
     | '/'
@@ -93,7 +128,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/produtos'
     | '/_authenticated/clientes/$id'
+    | '/_authenticated/movimentacoes/nova'
     | '/_authenticated/clientes/'
+    | '/_authenticated/movimentacoes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,6 +190,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/movimentacoes/': {
+      id: '/_authenticated/movimentacoes/'
+      path: '/movimentacoes'
+      fullPath: '/movimentacoes/'
+      preLoaderRoute: typeof AuthenticatedMovimentacoesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/movimentacoes/nova': {
+      id: '/_authenticated/movimentacoes/nova'
+      path: '/movimentacoes/nova'
+      fullPath: '/movimentacoes/nova'
+      preLoaderRoute: typeof AuthenticatedMovimentacoesNovaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -160,14 +211,18 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProdutosRoute: typeof AuthenticatedProdutosRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
+  AuthenticatedMovimentacoesNovaRoute: typeof AuthenticatedMovimentacoesNovaRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
+  AuthenticatedMovimentacoesIndexRoute: typeof AuthenticatedMovimentacoesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProdutosRoute: AuthenticatedProdutosRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
+  AuthenticatedMovimentacoesNovaRoute: AuthenticatedMovimentacoesNovaRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
+  AuthenticatedMovimentacoesIndexRoute: AuthenticatedMovimentacoesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

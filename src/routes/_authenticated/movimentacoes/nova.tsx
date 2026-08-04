@@ -165,11 +165,17 @@ function NovaMovimentacaoPage() {
 
   function enviar(e: React.FormEvent) {
     e.preventDefault();
-    if (!clienteId) return toast.error("Escolha o cliente");
-    if (!saidas.length && !retornos.length && !chopeiraSaida && !chopeiraRetorno && !cilindroSaida && !cilindroRetorno)
-      return toast.error("Inclua ao menos um item");
+    if (!clienteId) {
+      toast.error("Escolha o cliente");
+      return;
+    }
+    if (!saidas.length && !retornos.length && !chopeiraSaida && !chopeiraRetorno && !cilindroSaida && !cilindroRetorno) {
+      toast.error("Inclua ao menos um item");
+      return;
+    }
     if (precisaConfirmar && !confirmarBloqueio) {
-      return toast.error("Cliente bloqueado ou acima do limite — confirme a liberação do administrador");
+      toast.error("Cliente bloqueado ou acima do limite — confirme a liberação do administrador");
+      return;
     }
     salvar.mutate();
   }
