@@ -68,22 +68,24 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
     });
   }
   if (input.chopeiraSaida)
-    itens.push({ movimentacao_id: mov.id, categoria: "CHOPEIRA_SAIDA", chopeira_id: input.chopeiraSaida, quantidade: 1 });
+    itens.push({ movimentacao_id: mov.id, categoria: "CHOPEIRA_SAIDA", chopeira_id: input.chopeiraSaida, quantidade: 1, preco_unitario: 0 });
   if (input.chopeiraRetorno)
     itens.push({
       movimentacao_id: mov.id,
       categoria: "CHOPEIRA_RETORNO",
       chopeira_id: input.chopeiraRetorno,
       quantidade: 1,
+      preco_unitario: 0,
     });
   if (input.cilindroSaida)
-    itens.push({ movimentacao_id: mov.id, categoria: "CILINDRO_SAIDA", cilindro_id: input.cilindroSaida, quantidade: 1 });
+    itens.push({ movimentacao_id: mov.id, categoria: "CILINDRO_SAIDA", cilindro_id: input.cilindroSaida, quantidade: 1, preco_unitario: 0 });
   if (input.cilindroRetorno)
     itens.push({
       movimentacao_id: mov.id,
       categoria: "CILINDRO_RETORNO",
       cilindro_id: input.cilindroRetorno,
       quantidade: 1,
+      preco_unitario: 0,
     });
 
   if (itens.length) {
