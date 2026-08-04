@@ -141,7 +141,7 @@ export type Locacao = {
 };
 
 async function selectAll<T>(table: string, order?: string, asc = true): Promise<T[]> {
-  let q = supabase.from(table).select("*");
+  let q = supabase.from(table as never).select("*") as never as { order: (c: string, o: { ascending: boolean }) => unknown };
   if (order) q = q.order(order, { ascending: asc });
   const { data, error } = await q;
   if (error) throw error;
