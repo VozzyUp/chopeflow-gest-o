@@ -343,7 +343,7 @@ function FichaCliente() {
   );
 }
 
-function Info({ label, value }: { label: string; value?: string | null }) {
+function Info({ label, value }: { label: string; value?: string | null | undefined }) {
   return (
     <div>
       <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{label}</p>

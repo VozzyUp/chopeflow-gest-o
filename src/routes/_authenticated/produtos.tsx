@@ -56,12 +56,12 @@ function ProdutosPage() {
     mutationFn: async () => {
       const payload = {
         ...form,
-        volume_litros: Number(form.volume_litros) || 0,
-        custo_barril: Number(form.custo_barril) || 0,
-        preco_barril: Number(form.preco_barril) || 0,
-        preco_litro: Number(form.preco_litro) || 0,
-        estoque_minimo: Number(form.estoque_minimo) || 0,
-        ativo: form.ativo === true || form.ativo === "true",
+        volume_litros: Number(form["volume_litros"]) || 0,
+        custo_barril: Number(form["custo_barril"]) || 0,
+        preco_barril: Number(form["preco_barril"]) || 0,
+        preco_litro: Number(form["preco_litro"]) || 0,
+        estoque_minimo: Number(form["estoque_minimo"]) || 0,
+        ativo: form["ativo"] === true || form["ativo"] === "true",
       };
       if (editando) {
         const { error } = await supabase.from("produtos_chope").update(payload as never).eq("id", editando.id);
@@ -178,28 +178,28 @@ function ProdutosPage() {
           }}
         >
           <Field label="Nome do estilo" className="sm:col-span-2">
-            <Input value={String(form.nome ?? "")} onChange={set("nome")} required placeholder="Pilsen, IPA, Weiss..." />
+            <Input value={String(form["nome"] ?? "")} onChange={set("nome")} required placeholder="Pilsen, IPA, Weiss..." />
           </Field>
           <Field label="Cervejaria / fornecedor" className="sm:col-span-2">
-            <Input value={String(form.fornecedor ?? "")} onChange={set("fornecedor")} />
+            <Input value={String(form["fornecedor"] ?? "")} onChange={set("fornecedor")} />
           </Field>
           <Field label="Volume do barril (L)">
-            <Input type="number" step="1" value={String(form.volume_litros)} onChange={set("volume_litros")} />
+            <Input type="number" step="1" value={String(form["volume_litros"])} onChange={set("volume_litros")} />
           </Field>
           <Field label="Estoque mínimo (barris)">
-            <Input type="number" step="1" value={String(form.estoque_minimo)} onChange={set("estoque_minimo")} />
+            <Input type="number" step="1" value={String(form["estoque_minimo"])} onChange={set("estoque_minimo")} />
           </Field>
           <Field label="Custo por barril (R$)">
-            <Input type="number" step="0.01" value={String(form.custo_barril)} onChange={set("custo_barril")} />
+            <Input type="number" step="0.01" value={String(form["custo_barril"])} onChange={set("custo_barril")} />
           </Field>
           <Field label="Preço por barril (R$)">
-            <Input type="number" step="0.01" value={String(form.preco_barril)} onChange={set("preco_barril")} />
+            <Input type="number" step="0.01" value={String(form["preco_barril"])} onChange={set("preco_barril")} />
           </Field>
           <Field label="Preço por litro (R$)">
-            <Input type="number" step="0.01" value={String(form.preco_litro)} onChange={set("preco_litro")} />
+            <Input type="number" step="0.01" value={String(form["preco_litro"])} onChange={set("preco_litro")} />
           </Field>
           <Field label="Ativo">
-            <Select value={String(form.ativo)} onChange={set("ativo")}>
+            <Select value={String(form["ativo"])} onChange={set("ativo")}>
               <option value="true">Sim</option>
               <option value="false">Não</option>
             </Select>

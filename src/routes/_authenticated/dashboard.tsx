@@ -21,7 +21,6 @@ import {
   useProdutos,
 } from "@/lib/data";
 import { brl, dataBr, diasDesde, num } from "@/lib/format";
-import { barrilStatusLabel } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -265,7 +264,7 @@ function Dashboard() {
                       </Td>
                       <Td className="font-semibold">{qtd}</Td>
                       <Td className="text-muted-foreground">
-                        {qtd - vaz} {barrilStatusLabel.ENTREGUE_CLIENTE.toLowerCase()} · {vaz} vazios
+                        {qtd - vaz} entregues · {vaz} vazios
                       </Td>
                     </tr>
                   );
