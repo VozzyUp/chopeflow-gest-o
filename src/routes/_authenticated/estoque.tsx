@@ -83,14 +83,12 @@ function EstoquePage() {
 
   const mudarStatusBarril = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
-        .from("barris")
-        .update({
-          status: status as "CHEIO_ESTOQUE",
-          cliente_id: status === "CHEIO_ESTOQUE" || status === "EM_HIGIENIZACAO" ? null : undefined,
-          data_ultima_movimentacao: new Date().toISOString(),
-        })
-        .eq("id", id);
+      const patch: Record<string, unknown> = {
+        status,
+        data_ultima_movimentacao: new Date().toISOString(),
+      };
+      if (status === "CHEIO_ESTOQUE" || status === "EM_HIGIENIZACAO") patch["cliente_id"] = null;
+      const { error } = await supabase.from("barris").update(patch as never).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
