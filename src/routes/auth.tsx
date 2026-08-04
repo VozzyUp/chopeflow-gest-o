@@ -31,6 +31,7 @@ function AuthPage() {
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -38,9 +39,21 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  function traduzirErro(msg: string) {
+    if (/invalid login credentials/i.test(msg))
+      return "E-mail ou senha incorretos. Se ainda não tem conta, use a aba “Criar conta”.";
+    if (/email not confirmed/i.test(msg)) return "E-mail ainda não confirmado. Verifique sua caixa de entrada.";
+    if (/user already registered|already been registered/i.test(msg))
+      return "Este e-mail já possui conta. Use a aba “Entrar”.";
+    if (/password should be at least/i.test(msg)) return "A senha deve ter no mínimo 6 caracteres.";
+    if (/rate limit|too many/i.test(msg)) return "Muitas tentativas. Aguarde alguns instantes e tente novamente.";
+    return msg;
+  }
+
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setCarregando(true);
+    setErro(null);
     try {
       if (modo === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
@@ -59,14 +72,18 @@ function AuthPage() {
           navigate({ to: "/dashboard", replace: true });
         } else {
           toast.success("Confira seu e-mail para confirmar a conta.");
+          setErro("Enviamos um e-mail de confirmação. Confirme para entrar.");
         }
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Não foi possível continuar");
+      const msg = traduzirErro(err instanceof Error ? err.message : "Não foi possível continuar");
+      setErro(msg);
+      toast.error(msg);
     } finally {
       setCarregando(false);
     }
   }
+
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
