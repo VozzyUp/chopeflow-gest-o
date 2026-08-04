@@ -12,10 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  nitro: {
-    // The runtime rejects an explicit nodejs_compat flag once the compatibility
-    // date reaches 2026-08-04 (it became the default). Pin the date to the day
-    // before so the generated deploy config stays valid.
-    compatibilityDate: "2026-08-03",
-  },
+  // The runtime rejects an explicit nodejs_compat flag once the compatibility
+  // date reaches 2026-08-04 (it became the default). Pin the date to the day
+  // before so the generated deploy config stays valid.
+  nitro: { compatibilityDate: "2026-08-03" } as { preset?: string },
 });
