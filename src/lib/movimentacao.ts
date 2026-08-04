@@ -5,6 +5,7 @@ export type LinhaProduto = { produto_id: string; quantidade: number; preco_unita
 export type NovaMovimentacaoInput = {
   tipo: string;
   natureza: string;
+  /* natureza: VENDA | CONSIGNACAO | LOCACAO | COMODATO | INTERNO */
   cliente_id: string;
   responsavel: string;
   recebido_por: string;
@@ -35,8 +36,8 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
   const { data: mov, error: movErr } = await supabase
     .from("movimentacoes")
     .insert({
-      tipo: input.tipo,
-      natureza: input.natureza,
+      tipo: input.tipo as "ENTREGA",
+      natureza: input.natureza as "CONSIGNACAO",
       cliente_id: input.cliente_id,
       responsavel: input.responsavel || null,
       recebido_por: input.recebido_por || null,
@@ -86,7 +87,7 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
     });
 
   if (itens.length) {
-    const { error } = await supabase.from("movimentacao_itens").insert(itens);
+    const { error } = await supabase.from("movimentacao_itens").insert(itens as never);
     if (error) throw error;
   }
 
@@ -146,7 +147,7 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
     const { error } = await supabase
       .from("chopeiras")
       .update({
-        status: input.natureza === "LOCACAO" ? "EM_LOCACAO" : "EM_COMODATO",
+        status: input.natureza === "LOCACAO" ? ("EM_LOCACAO" as const) : ("EM_COMODATO" as const),
         cliente_id: input.cliente_id,
         data_saida: new Date().toISOString().slice(0, 10),
       })
@@ -247,7 +248,7 @@ export async function estornarMovimentacao(movId: string) {
   const { data: mov, error } = await supabase.from("movimentacoes").select("*").eq("id", movId).single();
   if (error) throw error;
   const { error: insErr } = await supabase.from("movimentacoes").insert({
-    tipo: "DEVOLUCAO",
+    tipo: "DEVOLUCAO" as const,
     natureza: mov.natureza,
     cliente_id: mov.cliente_id,
     responsavel: mov.responsavel,

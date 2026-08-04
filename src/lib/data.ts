@@ -140,12 +140,19 @@ export type Locacao = {
   observacoes: string | null;
 };
 
+type LooseResult = { data: unknown; error: unknown };
+type LooseBuilder = Promise<LooseResult> & {
+  order: (c: string, o: { ascending: boolean }) => Promise<LooseResult>;
+};
+
 async function selectAll<T>(table: string, order?: string, asc = true): Promise<T[]> {
-  let q = supabase.from(table as never).select("*") as never as { order: (c: string, o: { ascending: boolean }) => unknown };
-  if (order) q = q.order(order, { ascending: asc });
-  const { data, error } = await q;
-  if (error) throw error;
-  return (data ?? []) as T[];
+  const client = supabase as unknown as {
+    from: (t: string) => { select: (c: string) => LooseBuilder };
+  };
+  const base = client.from(table).select("*");
+  const res = order ? await base.order(order, { ascending: asc }) : await base;
+  if (res.error) throw res.error;
+  return ((res.data ?? []) as T[]);
 }
 
 export const useClientes = () =>
