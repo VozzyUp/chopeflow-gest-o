@@ -141,7 +141,13 @@ function AuthPage() {
                 autoComplete={modo === "login" ? "current-password" : "new-password"}
               />
             </Field>
+            {erro ? (
+              <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {erro}
+              </p>
+            ) : null}
             <Button type="submit" size="lg" className="w-full" disabled={carregando}>
+
               {carregando ? "Aguarde..." : modo === "login" ? "Entrar no sistema" : "Criar minha conta"}
             </Button>
           </form>
