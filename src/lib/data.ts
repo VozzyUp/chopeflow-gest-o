@@ -19,6 +19,7 @@ export type Cliente = {
   limite_credito: number;
   status: string;
   observacoes: string | null;
+  data_nascimento: string | null;
   created_at: string;
 };
 
