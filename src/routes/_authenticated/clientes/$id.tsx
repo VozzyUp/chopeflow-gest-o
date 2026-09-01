@@ -79,7 +79,9 @@ function FichaCliente() {
     <>
       <PageHead
         title={cliente.nome}
-        subtitle={`${clienteTipoLabel[cliente.tipo]} · ${cliente.documento ?? "sem documento"}`}
+        subtitle={`${clienteTipoLabel[cliente.tipo]} · ${cliente.documento ?? "sem documento"}${
+          cliente.data_nascimento ? ` · Aniversário: ${dataBr(cliente.data_nascimento)}` : ""
+        }`}
         actions={
           <>
             <Badge tone={statusTone(cliente.status)}>{clienteStatusLabel[cliente.status]}</Badge>
