@@ -111,6 +111,20 @@ export type Movimentacao = {
   valor_total: number;
   observacao: string | null;
   estornada: boolean;
+  endereco_entrega: string | null;
+  complemento_entrega: string | null;
+  data_entrega_prevista: string | null;
+  data_retirada_prevista: string | null;
+};
+
+export type EntradaEstoque = {
+  id: string;
+  produto_id: string;
+  nota_fiscal: string | null;
+  quantidade: number;
+  custo_unitario: number;
+  data: string;
+  observacao: string | null;
 };
 
 export type MovimentacaoItem = {
