@@ -1,6 +1,6 @@
 export const clienteTipoLabel: Record<string, string> = {
-  bar_convenio: "Bar / Convênio",
-  evento_pf: "Evento / PF",
+  bar: "Bar",
+  delivery: "Delivery",
   avulso: "Avulso",
 };
 
