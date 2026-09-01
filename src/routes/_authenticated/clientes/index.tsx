@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/supabase/client";
 import { useClientes, type Cliente } from "@/lib/data";
-import { brl } from "@/lib/format";
+import { brl, dataBr, inputDate } from "@/lib/format";
 import { clienteStatusLabel, clienteTipoLabel, condicaoPagamentoLabel, statusTone } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/clientes/")({
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/clientes/")({
 });
 
 const vazio = {
-  tipo: "bar_convenio",
+  tipo: "bar",
   nome: "",
   documento: "",
   telefone: "",
@@ -51,6 +51,7 @@ const vazio = {
   limite_credito: 0,
   status: "ativo",
   observacoes: "",
+  data_nascimento: "",
 };
 
 function ClientesPage() {
@@ -65,7 +66,11 @@ function ClientesPage() {
 
   const salvar = useMutation({
     mutationFn: async () => {
-      const payload = { ...form, limite_credito: Number(form["limite_credito"]) || 0 };
+      const payload = {
+        ...form,
+        limite_credito: Number(form["limite_credito"]) || 0,
+        data_nascimento: String(form["data_nascimento"] ?? "") || null,
+      };
       if (editando) {
         const { error } = await supabase.from("clientes").update(payload as never).eq("id", editando.id);
         if (error) throw error;
@@ -96,6 +101,15 @@ function ClientesPage() {
     });
   }, [clientes, busca, tipo, status]);
 
+  const mesAtual = new Date().getMonth() + 1;
+  const aniversariantes = useMemo(
+    () =>
+      (clientes ?? []).filter(
+        (c) => c.data_nascimento && Number(c.data_nascimento.slice(5, 7)) === mesAtual,
+      ),
+    [clientes, mesAtual],
+  );
+
   function abrirNovo() {
     setEditando(null);
     setForm(vazio);
@@ -104,7 +118,7 @@ function ClientesPage() {
 
   function abrirEdicao(c: Cliente) {
     setEditando(c);
-    setForm({ ...vazio, ...c });
+    setForm({ ...vazio, ...c, data_nascimento: c.data_nascimento ? inputDate(c.data_nascimento) : "" });
     setModal(true);
   }
 
@@ -118,6 +132,19 @@ function ClientesPage() {
         subtitle="Bares em convênio, eventos e avulsos"
         actions={<Button onClick={abrirNovo}>+ Novo cliente</Button>}
       />
+
+      {aniversariantes.length > 0 ? (
+        <Card className="mb-4">
+          <p className="text-xs tracking-wide text-muted-foreground uppercase">Aniversariantes do mês</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {aniversariantes.map((c) => (
+              <Badge key={c.id} tone="primary">
+                {c.nome} — {dataBr(c.data_nascimento)}
+              </Badge>
+            ))}
+          </div>
+        </Card>
+      ) : null}
 
       <Card className="mb-4">
         <div className="grid gap-3 sm:grid-cols-3">
@@ -220,6 +247,9 @@ function ClientesPage() {
           </Field>
           <Field label="Telefone / WhatsApp">
             <Input value={String(form["telefone"] ?? "")} onChange={set("telefone")} />
+          </Field>
+          <Field label="Data de aniversário">
+            <Input type="date" value={String(form["data_nascimento"] ?? "")} onChange={set("data_nascimento")} />
           </Field>
           <Field label="E-mail">
             <Input type="email" value={String(form["email"] ?? "")} onChange={set("email")} />
