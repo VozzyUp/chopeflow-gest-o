@@ -27,6 +27,8 @@ import {
   useChopeiras,
   useCilindros,
   useClientes,
+  useEntradasEstoque,
+  useMovimentacaoItens,
   useProdutos,
   useSaldosCliente,
 } from "@/lib/data";
@@ -45,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/estoque")({
   component: EstoquePage,
 });
 
-const abas = ["Barris", "Chopeiras", "Cilindros", "Saldo por cliente"] as const;
+const abas = ["Barris", "Chopeiras", "Cilindros", "Entradas do fabricante", "Saldo por cliente"] as const;
 
 function EstoquePage() {
   const [aba, setAba] = useState<(typeof abas)[number]>("Barris");
@@ -53,6 +55,15 @@ function EstoquePage() {
   const [produtoFiltro, setProdutoFiltro] = useState("");
   const [inventario, setInventario] = useState(false);
   const [ajuste, setAjuste] = useState({ codigo: "", produto_id: "", volume_litros: 50, status: "CHEIO_ESTOQUE" });
+  const [entradaModal, setEntradaModal] = useState(false);
+  const [entrada, setEntrada] = useState({
+    produto_id: "",
+    quantidade: 1,
+    custo_unitario: 0,
+    nota_fiscal: "",
+    data: new Date().toISOString().slice(0, 10),
+    observacao: "",
+  });
 
   const queryClient = useQueryClient();
   const { data: barris } = useBarris();
@@ -61,6 +72,61 @@ function EstoquePage() {
   const { data: clientes } = useClientes();
   const { data: produtos } = useProdutos();
   const { data: saldos } = useSaldosCliente();
+  const { data: entradas } = useEntradasEstoque();
+  const { data: movItens } = useMovimentacaoItens();
+
+  const criarEntrada = useMutation({
+    mutationFn: async () => {
+      if (!entrada.produto_id) throw new Error("Escolha o chope recebido");
+      const { error } = await supabase.from("movimentacao_estoque_chope").insert({
+        produto_id: entrada.produto_id,
+        quantidade: Number(entrada.quantidade),
+        custo_unitario: Number(entrada.custo_unitario),
+        nota_fiscal: entrada.nota_fiscal || null,
+        data: entrada.data,
+        observacao: entrada.observacao || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Entrada do fabricante registrada");
+      queryClient.invalidateQueries({ queryKey: ["movimentacao_estoque_chope"] });
+      setEntradaModal(false);
+      setEntrada((e) => ({ ...e, quantidade: 1, nota_fiscal: "", observacao: "" }));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const resumoProdutos = (produtos ?? []).map((p) => {
+    const recebido = (entradas ?? [])
+      .filter((e) => e.produto_id === p.id)
+      .reduce((s, e) => s + Number(e.quantidade), 0);
+    const retirado = (movItens ?? [])
+      .filter((i) => i.categoria === "BARRIL_CHEIO" && i.produto_id === p.id)
+      .reduce((s, i) => s + Number(i.quantidade), 0);
+    const emEstoque = (barris ?? []).filter((b) => b.produto_id === p.id && b.status === "CHEIO_ESTOQUE").length;
+    return { produto: p, recebido, retirado, emEstoque };
+  });
+
+  function exportarResumo() {
+    const linhas = [
+      ["Chope", "Recebido", "Retirado", "Em estoque", "Estoque minimo"],
+      ...resumoProdutos.map((r) => [
+        r.produto.nome,
+        String(r.recebido),
+        String(r.retirado),
+        String(r.emEstoque),
+        String(r.produto.estoque_minimo),
+      ]),
+    ];
+    const csv = linhas.map((l) => l.join(";")).join("\n");
+    const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "estoque-chope.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   const criarBarril = useMutation({
     mutationFn: async () => {
@@ -288,6 +354,78 @@ function EstoquePage() {
         </Card>
       ) : null}
 
+      {aba === "Entradas do fabricante" ? (
+        <>
+          <Card className="mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <CardTitle>Recebimento x retirada por chope</CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={exportarResumo}>
+                  Exportar CSV
+                </Button>
+                <Button onClick={() => setEntradaModal(true)}>+ Registrar entrada</Button>
+              </div>
+            </div>
+            <Table className="mt-3">
+              <thead>
+                <tr>
+                  <Th>Chope</Th>
+                  <Th>Recebido do fabricante</Th>
+                  <Th>Retirado / entregue</Th>
+                  <Th>Cheios em estoque</Th>
+                  <Th>Situação</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {resumoProdutos.map((r) => (
+                  <tr key={r.produto.id}>
+                    <Td className="font-semibold">{r.produto.nome}</Td>
+                    <Td>{num(r.recebido)}</Td>
+                    <Td>{num(r.retirado)}</Td>
+                    <Td className="font-semibold text-primary">{num(r.emEstoque)}</Td>
+                    <Td>
+                      <Badge tone={r.emEstoque <= r.produto.estoque_minimo ? "danger" : "success"}>
+                        {r.emEstoque <= r.produto.estoque_minimo ? "Abaixo do mínimo" : "Ok"}
+                      </Badge>
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+
+          <Card>
+            <CardTitle>Últimas entradas</CardTitle>
+            {(entradas ?? []).length === 0 ? (
+              <EmptyState>Nenhuma entrada do fabricante registrada.</EmptyState>
+            ) : (
+              <Table className="mt-3">
+                <thead>
+                  <tr>
+                    <Th>Data</Th>
+                    <Th>Chope</Th>
+                    <Th>Barris</Th>
+                    <Th className="hidden sm:table-cell">Custo unit.</Th>
+                    <Th className="hidden md:table-cell">Nota fiscal</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(entradas ?? []).map((e) => (
+                    <tr key={e.id}>
+                      <Td>{dataBr(e.data)}</Td>
+                      <Td>{nomeProduto(produtos, e.produto_id)}</Td>
+                      <Td className="font-semibold">{num(e.quantidade)}</Td>
+                      <Td className="hidden sm:table-cell">{brl(e.custo_unitario)}</Td>
+                      <Td className="hidden md:table-cell text-muted-foreground">{e.nota_fiscal ?? "—"}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Card>
+        </>
+      ) : null}
+
       {aba === "Saldo por cliente" ? (
         <Card>
           <CardTitle>Saldo agregado em poder do cliente (modo quantidade)</CardTitle>
@@ -317,6 +455,70 @@ function EstoquePage() {
           )}
         </Card>
       ) : null}
+
+      <Modal open={entradaModal} onClose={() => setEntradaModal(false)} title="Entrada de barris do fabricante">
+        <form
+          className="space-y-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            criarEntrada.mutate();
+          }}
+        >
+          <Field label="Chope recebido">
+            <Select
+              value={entrada.produto_id}
+              onChange={(e) => setEntrada((a) => ({ ...a, produto_id: e.target.value }))}
+              required
+            >
+              <option value="">Selecione...</option>
+              {(produtos ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nome} {num(p.volume_litros)}L
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Quantidade de barris">
+            <Input
+              type="number"
+              min={1}
+              value={entrada.quantidade}
+              onChange={(e) => setEntrada((a) => ({ ...a, quantidade: Number(e.target.value) }))}
+            />
+          </Field>
+          <Field label="Custo unitário (R$)">
+            <Input
+              type="number"
+              step="0.01"
+              value={entrada.custo_unitario}
+              onChange={(e) => setEntrada((a) => ({ ...a, custo_unitario: Number(e.target.value) }))}
+            />
+          </Field>
+          <Field label="Nota fiscal">
+            <Input
+              value={entrada.nota_fiscal}
+              onChange={(e) => setEntrada((a) => ({ ...a, nota_fiscal: e.target.value }))}
+            />
+          </Field>
+          <Field label="Data">
+            <Input type="date" value={entrada.data} onChange={(e) => setEntrada((a) => ({ ...a, data: e.target.value }))} />
+          </Field>
+          <Field label="Observação">
+            <Input
+              value={entrada.observacao}
+              onChange={(e) => setEntrada((a) => ({ ...a, observacao: e.target.value }))}
+            />
+          </Field>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={() => setEntradaModal(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={criarEntrada.isPending}>
+              Registrar entrada
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       <Modal open={inventario} onClose={() => setInventario(false)} title="Inventário / ajuste manual">
         <form
