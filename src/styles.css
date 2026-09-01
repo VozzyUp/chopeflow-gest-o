@@ -144,12 +144,21 @@
     color: #000 !important;
   }
 
-  body > *:not(.ficha-portal) {
-    display: none !important;
+  body * {
+    visibility: hidden !important;
+  }
+
+  .ficha,
+  .ficha * {
+    visibility: visible !important;
   }
 
   .ficha {
     display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     background: #fff;
     color: #000;
     font-family: Arial, Helvetica, sans-serif;
