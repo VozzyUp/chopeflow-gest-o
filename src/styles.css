@@ -132,3 +132,124 @@
   background-clip: text;
   color: transparent;
 }
+
+/* ---------- Ficha de pedido (impressão) ---------- */
+.ficha {
+  display: none;
+}
+
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body > *:not(.ficha-portal) {
+    display: none !important;
+  }
+
+  .ficha {
+    display: block;
+    background: #fff;
+    color: #000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    padding: 12mm 14mm;
+  }
+
+  .ficha hr {
+    border: 0;
+    border-top: 1px solid #000;
+    margin: 6mm 0;
+  }
+
+  .ficha-cabecalho {
+    text-align: center;
+    margin-bottom: 6mm;
+  }
+
+  .ficha-cabecalho h1 {
+    font-size: 15pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .ficha-cabecalho p {
+    margin: 1mm 0 0;
+    font-size: 9.5pt;
+  }
+
+  .ficha-numero {
+    font-weight: 700;
+    margin-top: 3mm !important;
+  }
+
+  .ficha-linha {
+    display: flex;
+    gap: 3mm;
+    align-items: baseline;
+    margin-bottom: 3.5mm;
+  }
+
+  .ficha-label {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .ficha-valor {
+    flex: 1;
+    border-bottom: 1px solid #000;
+  }
+
+  .ficha-bloco-titulo {
+    font-weight: 700;
+    margin: 4mm 0 1mm;
+  }
+
+  .ficha-bloco-texto {
+    margin: 0;
+    border-bottom: 1px solid #000;
+    min-height: 6mm;
+  }
+
+  .ficha-tabela {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ficha-tabela td {
+    border-bottom: 1px solid #000;
+    padding: 1.5mm 1mm;
+    vertical-align: top;
+  }
+
+  .ficha-td-direita {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .ficha-total {
+    font-weight: 700;
+    font-size: 12pt;
+    margin-top: 5mm;
+  }
+
+  .ficha-termo {
+    font-size: 8pt;
+    text-align: justify;
+    margin-top: 4mm;
+    line-height: 1.35;
+  }
+
+  .ficha-assinatura {
+    margin-top: 10mm;
+    font-size: 10pt;
+    font-weight: 700;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
