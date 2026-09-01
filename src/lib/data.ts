@@ -19,6 +19,7 @@ export type Cliente = {
   limite_credito: number;
   status: string;
   observacoes: string | null;
+  data_nascimento: string | null;
   created_at: string;
 };
 
@@ -110,6 +111,20 @@ export type Movimentacao = {
   valor_total: number;
   observacao: string | null;
   estornada: boolean;
+  endereco_entrega: string | null;
+  complemento_entrega: string | null;
+  data_entrega_prevista: string | null;
+  data_retirada_prevista: string | null;
+};
+
+export type EntradaEstoque = {
+  id: string;
+  produto_id: string;
+  nota_fiscal: string | null;
+  quantidade: number;
+  custo_unitario: number;
+  data: string;
+  observacao: string | null;
 };
 
 export type MovimentacaoItem = {
@@ -225,6 +240,12 @@ export const usePagamentos = () =>
         forma: string;
         observacao: string | null;
       }>("pagamentos", "data", false),
+  });
+
+export const useEntradasEstoque = () =>
+  useQuery({
+    queryKey: ["movimentacao_estoque_chope"],
+    queryFn: () => selectAll<EntradaEstoque>("movimentacao_estoque_chope", "data", false),
   });
 
 export const useEmpresa = () =>

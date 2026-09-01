@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -23,9 +23,36 @@ import {
   useMovimentacoes,
   useProdutos,
 } from "@/lib/data";
-import { brl, dataHoraBr, num } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
+import { brl, dataBr, dataHoraBr, num } from "@/lib/format";
 import { movNaturezaLabel, movTipoLabel } from "@/lib/labels";
-import { estornarMovimentacao } from "@/lib/movimentacao";
+import { estornarMovimentacao, urlFotoMovimentacao } from "@/lib/movimentacao";
+
+/** Fotos da entrega/instalação anexadas ao romaneio. */
+function FotosRomaneio({ movimentacaoId }: { movimentacaoId: string }) {
+  const { data } = useQuery({
+    queryKey: ["movimentacao_fotos", movimentacaoId],
+    queryFn: async () => {
+      const { data: fotos, error } = await supabase
+        .from("movimentacao_fotos")
+        .select("id, path")
+        .eq("movimentacao_id", movimentacaoId);
+      if (error) throw error;
+      return Promise.all((fotos ?? []).map(async (f) => ({ id: f.id, url: await urlFotoMovimentacao(f.path) })));
+    },
+  });
+
+  if (!data?.length) return null;
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {data.map((f) => (
+        <a key={f.id} href={f.url} target="_blank" rel="noreferrer">
+          <img src={f.url} alt="Foto da entrega" className="h-24 w-24 rounded-lg object-cover" />
+        </a>
+      ))}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/movimentacoes/")({
   head: () => ({
@@ -122,8 +149,8 @@ function HistoricoPage() {
               {lista.map((m) => {
                 const meus = (itens ?? []).filter((i) => i.movimentacao_id === m.id);
                 return (
-                  <>
-                    <tr key={m.id} className={m.estornada ? "opacity-50" : ""}>
+                  <Fragment key={m.id}>
+                    <tr className={m.estornada ? "opacity-50" : ""}>
                       <Td className="font-semibold">{m.numero}</Td>
                       <Td>{dataHoraBr(m.data)}</Td>
                       <Td>{nomeCliente(clientes, m.cliente_id)}</Td>
@@ -163,13 +190,25 @@ function HistoricoPage() {
                               ))}
                             </ul>
                           )}
+                          {m.endereco_entrega ? (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              Entrega em: {m.endereco_entrega}
+                              {m.complemento_entrega ? ` — ${m.complemento_entrega}` : ""}
+                            </p>
+                          ) : null}
+                          {m.data_entrega_prevista || m.data_retirada_prevista ? (
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              Entrega: {dataBr(m.data_entrega_prevista)} · Retirada: {dataBr(m.data_retirada_prevista)}
+                            </p>
+                          ) : null}
                           {m.observacao ? (
                             <p className="mt-2 text-xs text-muted-foreground">Obs.: {m.observacao}</p>
                           ) : null}
+                          <FotosRomaneio movimentacaoId={m.id} />
                         </Td>
                       </tr>
                     ) : null}
-                  </>
+                  </Fragment>
                 );
               })}
             </tbody>

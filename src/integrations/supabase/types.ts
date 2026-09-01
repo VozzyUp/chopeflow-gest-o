@@ -283,6 +283,7 @@ export type Database = {
           condicao_pagamento: string
           contato_responsavel: string | null
           created_at: string
+          data_nascimento: string | null
           documento: string | null
           email: string | null
           endereco: string | null
@@ -303,6 +304,7 @@ export type Database = {
           condicao_pagamento?: string
           contato_responsavel?: string | null
           created_at?: string
+          data_nascimento?: string | null
           documento?: string | null
           email?: string | null
           endereco?: string | null
@@ -323,6 +325,7 @@ export type Database = {
           condicao_pagamento?: string
           contato_responsavel?: string | null
           created_at?: string
+          data_nascimento?: string | null
           documento?: string | null
           email?: string | null
           endereco?: string | null
@@ -812,6 +815,38 @@ export type Database = {
           },
         ]
       }
+      movimentacao_fotos: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          movimentacao_id: string
+          path: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          movimentacao_id: string
+          path: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          movimentacao_id?: string
+          path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimentacao_fotos_movimentacao_id_fkey"
+            columns: ["movimentacao_id"]
+            isOneToOne: false
+            referencedRelation: "movimentacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movimentacao_itens: {
         Row: {
           barril_id: string | null
@@ -890,9 +925,13 @@ export type Database = {
       movimentacoes: {
         Row: {
           cliente_id: string | null
+          complemento_entrega: string | null
           created_at: string
           created_by: string | null
           data: string
+          data_entrega_prevista: string | null
+          data_retirada_prevista: string | null
+          endereco_entrega: string | null
           estornada: boolean
           estorno_de: string | null
           id: string
@@ -907,9 +946,13 @@ export type Database = {
         }
         Insert: {
           cliente_id?: string | null
+          complemento_entrega?: string | null
           created_at?: string
           created_by?: string | null
           data?: string
+          data_entrega_prevista?: string | null
+          data_retirada_prevista?: string | null
+          endereco_entrega?: string | null
           estornada?: boolean
           estorno_de?: string | null
           id?: string
@@ -924,9 +967,13 @@ export type Database = {
         }
         Update: {
           cliente_id?: string | null
+          complemento_entrega?: string | null
           created_at?: string
           created_by?: string | null
           data?: string
+          data_entrega_prevista?: string | null
+          data_retirada_prevista?: string | null
+          endereco_entrega?: string | null
           estornada?: boolean
           estorno_de?: string | null
           id?: string
@@ -1169,7 +1216,7 @@ export type Database = {
         | "MANUTENCAO"
         | "BAIXADO"
       cliente_status: "ativo" | "inativo" | "bloqueado"
-      cliente_tipo: "bar_convenio" | "evento_pf" | "avulso"
+      cliente_tipo: "bar" | "delivery" | "avulso"
       consignacao_status: "ABERTA" | "PARCIAL" | "ACERTADA"
       conta_status: "ABERTO" | "PARCIAL" | "PAGO" | "VENCIDO"
       locacao_status:
@@ -1340,7 +1387,7 @@ export const Constants = {
         "BAIXADO",
       ],
       cliente_status: ["ativo", "inativo", "bloqueado"],
-      cliente_tipo: ["bar_convenio", "evento_pf", "avulso"],
+      cliente_tipo: ["bar", "delivery", "avulso"],
       consignacao_status: ["ABERTA", "PARCIAL", "ACERTADA"],
       conta_status: ["ABERTO", "PARCIAL", "PAGO", "VENCIDO"],
       locacao_status: [

@@ -18,6 +18,10 @@ export type NovaMovimentacaoInput = {
   cilindroRetorno: string | null;
   gerarContaReceber: boolean;
   vencimentoDias: number;
+  endereco_entrega?: string | null;
+  complemento_entrega?: string | null;
+  data_entrega_prevista?: string | null;
+  data_retirada_prevista?: string | null;
 };
 
 /**
@@ -43,6 +47,10 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
       recebido_por: input.recebido_por || null,
       observacao: input.observacao || null,
       valor_total: valorTotal,
+      endereco_entrega: input.endereco_entrega || null,
+      complemento_entrega: input.complemento_entrega || null,
+      data_entrega_prevista: input.data_entrega_prevista || null,
+      data_retirada_prevista: input.data_retirada_prevista || null,
     })
     .select("*")
     .single();
@@ -261,4 +269,27 @@ export async function estornarMovimentacao(movId: string) {
   if (insErr) throw insErr;
   const { error: upErr } = await supabase.from("movimentacoes").update({ estornada: true }).eq("id", movId);
   if (upErr) throw upErr;
+}
+
+/** Envia a foto da entrega/instalação para o armazenamento e vincula ao romaneio. */
+export async function anexarFotoMovimentacao(movimentacaoId: string, file: File, descricao?: string) {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${movimentacaoId}/${crypto.randomUUID()}.${ext}`;
+  const { error: upErr } = await supabase.storage.from("romaneios").upload(path, file, {
+    contentType: file.type || "image/jpeg",
+    upsert: false,
+  });
+  if (upErr) throw upErr;
+  const { error } = await supabase
+    .from("movimentacao_fotos")
+    .insert({ movimentacao_id: movimentacaoId, path, descricao: descricao ?? null });
+  if (error) throw error;
+  return path;
+}
+
+/** URL assinada temporária para exibir uma foto do romaneio. */
+export async function urlFotoMovimentacao(path: string) {
+  const { data, error } = await supabase.storage.from("romaneios").createSignedUrl(path, 60 * 60);
+  if (error) throw error;
+  return data.signedUrl;
 }
