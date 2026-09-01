@@ -242,6 +242,12 @@ export const usePagamentos = () =>
       }>("pagamentos", "data", false),
   });
 
+export const useEntradasEstoque = () =>
+  useQuery({
+    queryKey: ["movimentacao_estoque_chope"],
+    queryFn: () => selectAll<EntradaEstoque>("movimentacao_estoque_chope", "data", false),
+  });
+
 export const useEmpresa = () =>
   useQuery({
     queryKey: ["empresa_config"],
