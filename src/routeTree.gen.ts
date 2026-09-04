@@ -20,6 +20,7 @@ import { Route as AuthenticatedEventosRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticated/produtos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
+import { Route as ApiDbRouteImport } from './routes/api/db'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes/index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes/$id'
 import { Route as AuthenticatedMovimentacoesIndexRouteImport } from './routes/_authenticated/movimentacoes/index'
@@ -81,6 +82,11 @@ const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiDbRoute = ApiDbRouteImport.update({
+  id: '/api/db',
+  path: '/api/db',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedClientesIndexRoute =
   AuthenticatedClientesIndexRouteImport.update({
     id: '/clientes/',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/db': typeof ApiDbRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/db': typeof ApiDbRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/produtos': typeof AuthenticatedProdutosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/db': typeof ApiDbRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/produtos'
     | '/relatorios'
+    | '/api/db'
     | '/clientes/$id'
     | '/movimentacoes/nova'
     | '/clientes/'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/produtos'
     | '/relatorios'
+    | '/api/db'
     | '/clientes/$id'
     | '/movimentacoes/nova'
     | '/clientes'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financeiro'
     | '/_authenticated/produtos'
     | '/_authenticated/relatorios'
+    | '/api/db'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/movimentacoes/nova'
     | '/_authenticated/clientes/'
@@ -211,6 +223,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiDbRoute: typeof ApiDbRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/db': {
+      id: '/api/db'
+      path: '/api/db'
+      fullPath: '/api/db'
+      preLoaderRoute: typeof ApiDbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/clientes/': {
       id: '/_authenticated/clientes/'
       path: '/clientes'
@@ -360,6 +380,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiDbRoute: ApiDbRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
