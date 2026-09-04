@@ -20,6 +20,7 @@ import { Route as AuthenticatedEventosRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticated/produtos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
+import { Route as ApiAuthRouteImport } from './routes/api/auth'
 import { Route as ApiDbRouteImport } from './routes/api/db'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes/index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes/$id'
@@ -82,6 +83,11 @@ const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiAuthRoute = ApiAuthRouteImport.update({
+  id: '/api/auth',
+  path: '/api/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDbRoute = ApiDbRouteImport.update({
   id: '/api/db',
   path: '/api/db',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/produtos': typeof AuthenticatedProdutosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/produtos'
     | '/relatorios'
+    | '/api/auth'
     | '/api/db'
     | '/clientes/$id'
     | '/movimentacoes/nova'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/produtos'
     | '/relatorios'
+    | '/api/auth'
     | '/api/db'
     | '/clientes/$id'
     | '/movimentacoes/nova'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financeiro'
     | '/_authenticated/produtos'
     | '/_authenticated/relatorios'
+    | '/api/auth'
     | '/api/db'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/movimentacoes/nova'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiAuthRoute: typeof ApiAuthRoute
   ApiDbRoute: typeof ApiDbRoute
 }
 
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/auth': {
+      id: '/api/auth'
+      path: '/api/auth'
+      fullPath: '/api/auth'
+      preLoaderRoute: typeof ApiAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/db': {
       id: '/api/db'
       path: '/api/db'
@@ -380,6 +400,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiAuthRoute: ApiAuthRoute,
   ApiDbRoute: ApiDbRoute,
 }
 export const routeTree = rootRouteImport
