@@ -25,7 +25,7 @@ Se quiser começar do zero, importe só os dois primeiros.
 
 ## 3. Gerar os arquivos do site
 
-No projeto (localmente ou pelo terminal da Hostinger):
+No seu computador ou no terminal da Hostinger (esse passo não roda dentro do editor Lovable, que sempre gera a versão da nuvem):
 
 ```sh
 npm install
