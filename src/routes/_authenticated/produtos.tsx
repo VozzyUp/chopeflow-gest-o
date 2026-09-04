@@ -17,7 +17,7 @@ import {
   Td,
   Th,
 } from "@/components/ui/primitives";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 import { useBarris, useProdutos, type Produto } from "@/lib/data";
 import { brl, num } from "@/lib/format";
 

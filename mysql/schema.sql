@@ -1,0 +1,333 @@
+-- ChopeControl — estrutura do banco para MySQL 8 (Hostinger)
+-- Importe este arquivo no phpMyAdmin da Hostinger ANTES de dados.sql.
+-- Todas as tabelas usam CHAR(36) para os identificadores (UUID).
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ===================== USUÁRIOS / ACESSO =====================
+CREATE TABLE IF NOT EXISTS app_users (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  senha_hash VARCHAR(255) NOT NULL,
+  nome VARCHAR(255) NOT NULL DEFAULT '',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS profiles (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  nome VARCHAR(255) NOT NULL DEFAULT '',
+  email VARCHAR(255) NULL,
+  telefone VARCHAR(60) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS user_roles (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  role ENUM('admin','operacional','financeiro') NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_user_role (user_id, role)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ===================== EMPRESA =====================
+CREATE TABLE IF NOT EXISTS empresa_config (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  nome VARCHAR(255) NOT NULL DEFAULT 'ChopeControl Distribuidora',
+  cnpj VARCHAR(30) NULL,
+  telefone VARCHAR(60) NULL,
+  email VARCHAR(255) NULL,
+  endereco TEXT NULL,
+  logo_url TEXT NULL,
+  dias_alerta_barril_parado INT NOT NULL DEFAULT 21,
+  dias_alerta_higienizacao INT NOT NULL DEFAULT 90,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ===================== CADASTROS =====================
+CREATE TABLE IF NOT EXISTS clientes (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  tipo ENUM('bar','delivery','avulso') NOT NULL DEFAULT 'avulso',
+  nome VARCHAR(255) NOT NULL,
+  documento VARCHAR(40) NULL,
+  telefone VARCHAR(60) NULL,
+  email VARCHAR(255) NULL,
+  endereco TEXT NULL,
+  cidade VARCHAR(120) NULL,
+  uf VARCHAR(4) NULL,
+  cep VARCHAR(15) NULL,
+  contato_responsavel VARCHAR(255) NULL,
+  condicao_pagamento VARCHAR(40) NOT NULL DEFAULT 'a_vista',
+  tabela_preco VARCHAR(40) NOT NULL DEFAULT 'padrao',
+  limite_credito DECIMAL(12,2) NOT NULL DEFAULT 0,
+  status ENUM('ativo','inativo','bloqueado') NOT NULL DEFAULT 'ativo',
+  observacoes TEXT NULL,
+  data_nascimento DATE NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS produtos_chope (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  nome VARCHAR(255) NOT NULL,
+  fornecedor VARCHAR(255) NULL,
+  volume_litros DECIMAL(8,2) NOT NULL DEFAULT 50,
+  custo_barril DECIMAL(12,2) NOT NULL DEFAULT 0,
+  preco_barril DECIMAL(12,2) NOT NULL DEFAULT 0,
+  preco_litro DECIMAL(12,2) NOT NULL DEFAULT 0,
+  estoque_minimo INT NOT NULL DEFAULT 5,
+  ativo TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS barris (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  codigo VARCHAR(60) NOT NULL UNIQUE,
+  produto_id CHAR(36) NULL,
+  volume_litros DECIMAL(8,2) NOT NULL DEFAULT 50,
+  status ENUM('CHEIO_ESTOQUE','ENTREGUE_CLIENTE','VAZIO_NO_CLIENTE','EM_TRANSITO_RETORNO','EM_HIGIENIZACAO','MANUTENCAO','BAIXADO') NOT NULL DEFAULT 'CHEIO_ESTOQUE',
+  cliente_id CHAR(36) NULL,
+  data_ultima_movimentacao DATETIME NULL,
+  ciclos INT NOT NULL DEFAULT 0,
+  observacoes TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_barris_produto (produto_id),
+  KEY idx_barris_cliente (cliente_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS chopeiras (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  codigo VARCHAR(60) NOT NULL UNIQUE,
+  marca_modelo VARCHAR(255) NULL,
+  numero_serie VARCHAR(120) NULL,
+  torneiras INT NOT NULL DEFAULT 1,
+  tipo VARCHAR(40) NOT NULL DEFAULT 'eletrica',
+  status ENUM('DISPONIVEL','EM_COMODATO','EM_LOCACAO','MANUTENCAO','BAIXADA') NOT NULL DEFAULT 'DISPONIVEL',
+  cliente_id CHAR(36) NULL,
+  data_saida DATE NULL,
+  data_prevista_retorno DATE NULL,
+  valor_equipamento DECIMAL(12,2) NOT NULL DEFAULT 0,
+  ultima_higienizacao DATE NULL,
+  proxima_higienizacao DATE NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS cilindros (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  codigo VARCHAR(60) NOT NULL UNIQUE,
+  tipo VARCHAR(40) NOT NULL DEFAULT 'CO2',
+  capacidade_kg DECIMAL(8,2) NOT NULL DEFAULT 6,
+  status ENUM('DISPONIVEL','COM_CLIENTE','VAZIO_RETORNO','MANUTENCAO','BAIXADO') NOT NULL DEFAULT 'DISPONIVEL',
+  cliente_id CHAR(36) NULL,
+  data_saida DATE NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS contratos_comodato (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  cliente_id CHAR(36) NOT NULL,
+  chopeira_id CHAR(36) NULL,
+  data_inicio DATE NOT NULL,
+  vigencia_meses INT NOT NULL DEFAULT 12,
+  consumo_minimo_barris DECIMAL(10,2) NOT NULL DEFAULT 0,
+  valor_multa DECIMAL(12,2) NOT NULL DEFAULT 0,
+  valor_garantia DECIMAL(12,2) NOT NULL DEFAULT 0,
+  status VARCHAR(40) NOT NULL DEFAULT 'ATIVO',
+  termo_url TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ===================== EVENTOS =====================
+CREATE TABLE IF NOT EXISTS locacoes_eventos (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  cliente_id CHAR(36) NOT NULL,
+  data_evento DATETIME NOT NULL,
+  endereco_evento TEXT NULL,
+  valor_locacao DECIMAL(12,2) NOT NULL DEFAULT 0,
+  valor_caucao DECIMAL(12,2) NOT NULL DEFAULT 0,
+  caucao_devolvida TINYINT(1) NOT NULL DEFAULT 0,
+  taxa_entrega DECIMAL(12,2) NOT NULL DEFAULT 0,
+  forma_pagamento VARCHAR(60) NULL,
+  status ENUM('ORCAMENTO','CONFIRMADO','ENTREGUE','COLETADO','FINALIZADO','CANCELADO') NOT NULL DEFAULT 'ORCAMENTO',
+  data_entrega DATETIME NULL,
+  data_coleta DATETIME NULL,
+  observacoes TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS locacao_itens (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  locacao_id CHAR(36) NOT NULL,
+  produto_id CHAR(36) NULL,
+  chopeira_id CHAR(36) NULL,
+  quantidade DECIMAL(10,2) NOT NULL DEFAULT 1,
+  quantidade_consumida DECIMAL(10,2) NOT NULL DEFAULT 0,
+  preco_unitario DECIMAL(12,2) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_locacao_itens (locacao_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ===================== MOVIMENTAÇÕES =====================
+CREATE TABLE IF NOT EXISTS movimentacoes (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  numero INT NOT NULL AUTO_INCREMENT,
+  tipo ENUM('ENTREGA','COLETA','TROCA','VENDA_AVULSA','DEVOLUCAO','AJUSTE_INVENTARIO','PERDA') NOT NULL,
+  natureza ENUM('VENDA','CONSIGNACAO','LOCACAO','COMODATO','INTERNO') NOT NULL DEFAULT 'CONSIGNACAO',
+  data DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  cliente_id CHAR(36) NULL,
+  locacao_id CHAR(36) NULL,
+  responsavel VARCHAR(255) NULL,
+  recebido_por VARCHAR(255) NULL,
+  valor_total DECIMAL(12,2) NOT NULL DEFAULT 0,
+  observacao TEXT NULL,
+  estornada TINYINT(1) NOT NULL DEFAULT 0,
+  estorno_de CHAR(36) NULL,
+  created_by CHAR(36) NULL,
+  endereco_entrega TEXT NULL,
+  complemento_entrega TEXT NULL,
+  data_entrega_prevista DATE NULL,
+  data_retirada_prevista DATE NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_mov_numero (numero),
+  KEY idx_mov_cliente (cliente_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS movimentacao_itens (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  movimentacao_id CHAR(36) NOT NULL,
+  categoria VARCHAR(40) NOT NULL DEFAULT 'BARRIL_CHEIO',
+  produto_id CHAR(36) NULL,
+  barril_id CHAR(36) NULL,
+  chopeira_id CHAR(36) NULL,
+  cilindro_id CHAR(36) NULL,
+  quantidade DECIMAL(10,2) NOT NULL DEFAULT 1,
+  preco_unitario DECIMAL(12,2) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_mov_itens (movimentacao_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS movimentacao_fotos (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  movimentacao_id CHAR(36) NOT NULL,
+  path TEXT NOT NULL,
+  descricao TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_mov_fotos (movimentacao_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS movimentacao_estoque_chope (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  produto_id CHAR(36) NOT NULL,
+  nota_fiscal VARCHAR(60) NULL,
+  quantidade DECIMAL(10,2) NOT NULL DEFAULT 0,
+  custo_unitario DECIMAL(12,2) NOT NULL DEFAULT 0,
+  data DATE NOT NULL,
+  observacao TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ===================== CONSIGNAÇÕES / ACERTOS =====================
+CREATE TABLE IF NOT EXISTS consignacoes (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  cliente_id CHAR(36) NOT NULL,
+  produto_id CHAR(36) NULL,
+  movimentacao_id CHAR(36) NULL,
+  quantidade_entregue DECIMAL(10,2) NOT NULL DEFAULT 0,
+  quantidade_acertada DECIMAL(10,2) NOT NULL DEFAULT 0,
+  preco_unitario DECIMAL(12,2) NOT NULL DEFAULT 0,
+  data_entrega DATE NOT NULL,
+  data_limite DATE NULL,
+  status ENUM('ABERTA','PARCIAL','ACERTADA') NOT NULL DEFAULT 'ABERTA',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS acertos (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  cliente_id CHAR(36) NOT NULL,
+  periodo_inicio DATE NULL,
+  periodo_fim DATE NULL,
+  valor_bruto DECIMAL(12,2) NOT NULL DEFAULT 0,
+  desconto DECIMAL(12,2) NOT NULL DEFAULT 0,
+  valor_final DECIMAL(12,2) NOT NULL DEFAULT 0,
+  data_acerto DATE NOT NULL,
+  observacao TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS acerto_itens (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  acerto_id CHAR(36) NOT NULL,
+  consignacao_id CHAR(36) NULL,
+  produto_id CHAR(36) NULL,
+  quantidade DECIMAL(10,2) NOT NULL DEFAULT 0,
+  preco_unitario DECIMAL(12,2) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ===================== FINANCEIRO =====================
+CREATE TABLE IF NOT EXISTS contas_receber (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  origem VARCHAR(40) NOT NULL DEFAULT 'acerto',
+  cliente_id CHAR(36) NOT NULL,
+  acerto_id CHAR(36) NULL,
+  locacao_id CHAR(36) NULL,
+  movimentacao_id CHAR(36) NULL,
+  descricao TEXT NULL,
+  valor_total DECIMAL(12,2) NOT NULL DEFAULT 0,
+  valor_pago DECIMAL(12,2) NOT NULL DEFAULT 0,
+  saldo DECIMAL(12,2) NOT NULL DEFAULT 0,
+  vencimento DATE NOT NULL,
+  status ENUM('ABERTO','PARCIAL','PAGO','VENCIDO') NOT NULL DEFAULT 'ABERTO',
+  data_pagamento DATE NULL,
+  forma VARCHAR(40) NULL,
+  observacao TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_contas_cliente (cliente_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS pagamentos (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  conta_id CHAR(36) NOT NULL,
+  valor DECIMAL(12,2) NOT NULL,
+  data DATE NOT NULL,
+  forma VARCHAR(40) NOT NULL DEFAULT 'PIX',
+  observacao TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_pagamentos_conta (conta_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS higienizacoes_manutencoes (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  ativo_tipo VARCHAR(40) NOT NULL DEFAULT 'chopeira',
+  chopeira_id CHAR(36) NULL,
+  barril_id CHAR(36) NULL,
+  tipo VARCHAR(40) NOT NULL DEFAULT 'higienizacao',
+  data DATE NOT NULL,
+  custo DECIMAL(12,2) NOT NULL DEFAULT 0,
+  tecnico VARCHAR(255) NULL,
+  descricao TEXT NULL,
+  proxima_data DATE NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS saldos_cliente (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  cliente_id CHAR(36) NOT NULL,
+  produto_id CHAR(36) NOT NULL,
+  barris_cheios DECIMAL(10,2) NOT NULL DEFAULT 0,
+  barris_vazios DECIMAL(10,2) NOT NULL DEFAULT 0,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_saldo (cliente_id, produto_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 1;

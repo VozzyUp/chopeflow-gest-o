@@ -18,7 +18,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/primitives";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 import { cn } from "@/lib/utils";
 
 const nav = [

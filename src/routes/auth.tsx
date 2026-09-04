@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button, Card, Field, Input } from "@/components/ui/primitives";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
