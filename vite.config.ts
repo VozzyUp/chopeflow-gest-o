@@ -19,7 +19,8 @@ export default defineConfig({
   // The runtime rejects an explicit nodejs_compat flag once the compatibility
   // date reaches 2026-08-04 (it became the default). Pin the date to the day
   // before so the generated deploy config stays valid.
-  nitro: (alvoNode
-    ? { preset: "node-server", compatibilityDate: "2026-08-03" }
-    : { compatibilityDate: "2026-08-03" }) as { preset?: string },
+  nitro: {
+    compatibilityDate: "2026-08-03",
+    ...(alvoNode ? { preset: "node-server" } : {}),
+  } as { preset?: string },
 });
