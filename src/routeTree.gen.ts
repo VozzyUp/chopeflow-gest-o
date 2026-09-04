@@ -22,6 +22,7 @@ import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as ApiAuthRouteImport } from './routes/api/auth'
 import { Route as ApiDbRouteImport } from './routes/api/db'
+import { Route as ApiStorageRouteImport } from './routes/api/storage'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes/index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes/$id'
 import { Route as AuthenticatedMovimentacoesIndexRouteImport } from './routes/_authenticated/movimentacoes/index'
@@ -93,6 +94,11 @@ const ApiDbRoute = ApiDbRouteImport.update({
   path: '/api/db',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStorageRoute = ApiStorageRouteImport.update({
+  id: '/api/storage',
+  path: '/api/storage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedClientesIndexRoute =
   AuthenticatedClientesIndexRouteImport.update({
     id: '/clientes/',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
+  '/api/storage': typeof ApiStorageRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
+  '/api/storage': typeof ApiStorageRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
+  '/api/storage': typeof ApiStorageRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/movimentacoes/nova': typeof AuthenticatedMovimentacoesNovaRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/api/auth'
     | '/api/db'
+    | '/api/storage'
     | '/clientes/$id'
     | '/movimentacoes/nova'
     | '/clientes/'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/api/auth'
     | '/api/db'
+    | '/api/storage'
     | '/clientes/$id'
     | '/movimentacoes/nova'
     | '/clientes'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/_authenticated/relatorios'
     | '/api/auth'
     | '/api/db'
+    | '/api/storage'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/movimentacoes/nova'
     | '/_authenticated/clientes/'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ApiAuthRoute: typeof ApiAuthRoute
   ApiDbRoute: typeof ApiDbRoute
+  ApiStorageRoute: typeof ApiStorageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDbRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/storage': {
+      id: '/api/storage'
+      path: '/api/storage'
+      fullPath: '/api/storage'
+      preLoaderRoute: typeof ApiStorageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/clientes/': {
       id: '/_authenticated/clientes/'
       path: '/clientes'
@@ -402,6 +422,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ApiAuthRoute: ApiAuthRoute,
   ApiDbRoute: ApiDbRoute,
+  ApiStorageRoute: ApiStorageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
