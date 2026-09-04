@@ -23,7 +23,7 @@ import {
   useMovimentacoes,
   useProdutos,
 } from "@/lib/data";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 import { brl, dataBr, dataHoraBr, num } from "@/lib/format";
 import { movNaturezaLabel, movTipoLabel } from "@/lib/labels";
 import { estornarMovimentacao, urlFotoMovimentacao } from "@/lib/movimentacao";

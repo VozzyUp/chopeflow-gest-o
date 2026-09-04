@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AppShell } from "@/components/app-shell";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,

@@ -19,7 +19,7 @@ import {
   Textarea,
   Th,
 } from "@/components/ui/primitives";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 import { nomeCliente, useClientes, useLocacoes, useProdutos, type Locacao } from "@/lib/data";
 import { brl, dataBr, dataHoraBr } from "@/lib/format";
 import { locacaoStatusLabel, statusTone } from "@/lib/labels";

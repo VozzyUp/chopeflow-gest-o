@@ -15,7 +15,7 @@ import {
   Td,
   Th,
 } from "@/components/ui/primitives";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 import { useEmpresa } from "@/lib/data";
 import { roleLabel } from "@/lib/labels";
 

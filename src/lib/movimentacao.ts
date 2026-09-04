@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 
 export type LinhaProduto = { produto_id: string; quantidade: number; preco_unitario: number };
 

@@ -19,7 +19,7 @@ import {
   Td,
   Th,
 } from "@/components/ui/primitives";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/db/client";
 import { nomeCliente, nomeProduto, useClientes, useConsignacoes, useProdutos } from "@/lib/data";
 import { brl, dataBr, diasDesde, num } from "@/lib/format";
 import { consignacaoStatusLabel, statusTone } from "@/lib/labels";
