@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "build:hostinger": "DEPLOY_TARGET=node VITE_DATA_BACKEND=mysql vite build",
+    "build:hostinger": "DEPLOY_TARGET=node VITE_DATA_BACKEND=mysql vite build && node scripts/copiar-driver-mysql.mjs",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
