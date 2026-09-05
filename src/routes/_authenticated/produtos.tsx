@@ -24,9 +24,9 @@ import { brl, num } from "@/lib/format";
 export const Route = createFileRoute("/_authenticated/produtos")({
   head: () => ({
     meta: [
-      { title: "Chopes — ChopeControl" },
-      { name: "description", content: "Cadastro de estilos de chope com custo, preço de venda e margem calculada." },
-      { property: "og:title", content: "Chopes — ChopeControl" },
+      { title: "Chopps — V-Chopp" },
+      { name: "description", content: "Cadastro de estilos de chopp com custo, preço de venda e margem calculada." },
+      { property: "og:title", content: "Chopps — V-Chopp" },
       { property: "og:description", content: "Pilsen, IPA, Weiss e mais: custo por barril, preço por litro e margem." },
     ],
   }),
@@ -72,7 +72,7 @@ function ProdutosPage() {
       }
     },
     onSuccess: () => {
-      toast.success("Chope salvo");
+      toast.success("Chopp salvo");
       queryClient.invalidateQueries({ queryKey: ["produtos"] });
       setModal(false);
       setEditando(null);
@@ -87,7 +87,7 @@ function ProdutosPage() {
   return (
     <>
       <PageHead
-        title="Chopes"
+        title="Chopps"
         subtitle="Estilos, custo, preço e margem"
         actions={
           <Button
@@ -97,7 +97,7 @@ function ProdutosPage() {
               setModal(true);
             }}
           >
-            + Novo chope
+            + Novo chopp
           </Button>
         }
       />
@@ -106,12 +106,12 @@ function ProdutosPage() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : (produtos ?? []).length === 0 ? (
-          <EmptyState>Nenhum chope cadastrado.</EmptyState>
+          <EmptyState>Nenhum chopp cadastrado.</EmptyState>
         ) : (
           <Table>
             <thead>
               <tr>
-                <Th>Chope</Th>
+                <Th>Chopp</Th>
                 <Th className="hidden sm:table-cell">Cervejaria</Th>
                 <Th>Volume</Th>
                 <Th>Custo</Th>
@@ -169,7 +169,7 @@ function ProdutosPage() {
         )}
       </Card>
 
-      <Modal open={modal} onClose={() => setModal(false)} title={editando ? "Editar chope" : "Novo chope"}>
+      <Modal open={modal} onClose={() => setModal(false)} title={editando ? "Editar chopp" : "Novo chopp"}>
         <form
           className="grid gap-3 sm:grid-cols-2"
           onSubmit={(e) => {

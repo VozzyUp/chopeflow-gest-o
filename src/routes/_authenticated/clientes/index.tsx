@@ -26,9 +26,9 @@ import { clienteStatusLabel, clienteTipoLabel, condicaoPagamentoLabel, statusTon
 export const Route = createFileRoute("/_authenticated/clientes/")({
   head: () => ({
     meta: [
-      { title: "Clientes — ChopeControl" },
+      { title: "Clientes — V-Chopp" },
       { name: "description", content: "Cadastro de bares em convênio, clientes de evento e vendas avulsas." },
-      { property: "og:title", content: "Clientes — ChopeControl" },
+      { property: "og:title", content: "Clientes — V-Chopp" },
       { property: "og:description", content: "Bares em convênio, eventos e clientes avulsos com limite de crédito e situação." },
     ],
   }),

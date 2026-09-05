@@ -26,7 +26,7 @@ const nav = [
   { to: "/movimentacoes/nova", label: "Nova movimentação", icon: ClipboardList },
   { to: "/movimentacoes", label: "Histórico", icon: Package },
   { to: "/clientes", label: "Clientes", icon: Users },
-  { to: "/produtos", label: "Chopes", icon: Beer },
+  { to: "/produtos", label: "Chopps", icon: Beer },
   { to: "/estoque", label: "Estoque e ativos", icon: Package },
   { to: "/eventos", label: "Eventos / Locações", icon: CalendarDays },
   { to: "/consignacoes", label: "Consignação e acertos", icon: Handshake },
@@ -57,7 +57,7 @@ export function AppShell() {
       {/* Topbar mobile */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-sidebar px-4 py-3 lg:hidden">
         <Link to="/dashboard" className="font-display text-xl font-bold">
-          <span className="text-gradient-amber">Chope</span>Control
+          <span className="text-gradient-amber">V</span>-Chopp
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setAberto((v) => !v)} aria-label="Menu">
           {aberto ? <X /> : <Menu />}
@@ -73,9 +73,9 @@ export function AppShell() {
       >
         <div className="hidden px-5 py-6 lg:block">
           <Link to="/dashboard" className="font-display text-2xl font-bold">
-            <span className="text-gradient-amber">Chope</span>Control
+            <span className="text-gradient-amber">V</span>-Chopp
           </Link>
-          <p className="mt-1 text-xs text-muted-foreground">Distribuidora de chope</p>
+          <p className="mt-1 text-xs text-muted-foreground">Distribuidora de chopp</p>
         </div>
         <nav className="flex flex-col gap-1 p-3 lg:px-3 lg:py-0">
           {nav.map((item) => {

@@ -32,9 +32,9 @@ import { anexarFotoMovimentacao, registrarMovimentacao, type LinhaProduto } from
 export const Route = createFileRoute("/_authenticated/movimentacoes/nova")({
   head: () => ({
     meta: [
-      { title: "Nova movimentação — ChopeControl" },
+      { title: "Nova movimentação — V-Chopp" },
       { name: "description", content: "Romaneio rápido de entrega e coleta de barris, chopeiras e cilindros." },
-      { property: "og:title", content: "Nova movimentação — ChopeControl" },
+      { property: "og:title", content: "Nova movimentação — V-Chopp" },
       {
         property: "og:description",
         content: "Romaneio de entrega/coleta em poucos toques, com ficha imprimível, foto da entrega e envio no WhatsApp.",
@@ -153,14 +153,14 @@ function NovaMovimentacaoPage() {
       ...saidas.map((l) => {
         const p = produtos?.find((x) => x.id === l.produto_id);
         return {
-          descricao: `${p?.nome ?? "Chope"} ${num(p?.volume_litros ?? 0)}L (saída)`,
+          descricao: `${p?.nome ?? "Chopp"} ${num(p?.volume_litros ?? 0)}L (saída)`,
           quantidade: l.quantidade,
           preco: natureza === "CONSIGNACAO" ? 0 : l.preco_unitario,
         };
       }),
       ...retornos.map((l) => {
         const p = produtos?.find((x) => x.id === l.produto_id);
-        return { descricao: `${p?.nome ?? "Chope"} — barril vazio (retorno)`, quantidade: l.quantidade, preco: 0 };
+        return { descricao: `${p?.nome ?? "Chopp"} — barril vazio (retorno)`, quantidade: l.quantidade, preco: 0 };
       }),
     ],
     equipamentos: equipamentosTexto,
@@ -229,7 +229,7 @@ function NovaMovimentacaoPage() {
 
   function textoRomaneio(numero: number) {
     const linhas: string[] = [];
-    linhas.push(`*${empresa?.nome ?? "ChopeControl"} — Romaneio #${numero}*`);
+    linhas.push(`*${empresa?.nome ?? "V-Chopp"} — Romaneio #${numero}*`);
     linhas.push(`Cliente: ${cliente?.nome ?? "—"}`);
     linhas.push(`Data: ${dataHoraBr(new Date())}`);
     linhas.push(`Operação: ${movTipoLabel[tipo] ?? tipo} · ${movNaturezaLabel[natureza] ?? natureza}`);

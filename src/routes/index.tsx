@@ -7,13 +7,13 @@ import { supabase } from "@/integrations/db/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ChopeControl — Gestão para distribuidora de chope" },
+      { title: "V-Chopp — Gestão para distribuidora de chopp" },
       {
         name: "description",
         content:
-          "Controle barris na rua, chopeiras em comodato, consignações, acertos e contas a receber da sua distribuidora de chope.",
+          "Controle barris na rua, chopeiras em comodato, consignações, acertos e contas a receber da sua distribuidora de chopp.",
       },
-      { property: "og:title", content: "ChopeControl — Gestão para distribuidora de chope" },
+      { property: "og:title", content: "V-Chopp — Gestão para distribuidora de chopp" },
       {
         property: "og:description",
         content:
@@ -37,7 +37,7 @@ function Home() {
     <main className="flex min-h-screen items-center justify-center px-6 py-16">
       <div className="max-w-2xl text-center">
         <p className="font-display text-5xl font-bold sm:text-6xl">
-          <span className="text-gradient-amber">Chope</span>Control
+          <span className="text-gradient-amber">V</span>-Chopp
         </p>
         <h1 className="mt-6 text-2xl font-bold sm:text-3xl">
           Saiba onde estão seus barris, chopeiras e o seu dinheiro

@@ -18,9 +18,9 @@ import { brl, dataBr, diasDesde, num } from "@/lib/format";
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
     meta: [
-      { title: "Relatórios — ChopeControl" },
+      { title: "Relatórios — V-Chopp" },
       { name: "description", content: "Barris por cliente, giro de vasilhame, inadimplência e rentabilidade." },
-      { property: "og:title", content: "Relatórios — ChopeControl" },
+      { property: "og:title", content: "Relatórios — V-Chopp" },
       { property: "og:description", content: "Giro de barril, tempo médio de retorno, ranking de consumo e exportação CSV." },
     ],
   }),
@@ -66,7 +66,7 @@ function RelatoriosPage() {
 
     if (rel === "Giro de barril") {
       return {
-        colunas: ["Barril", "Chope", "Ciclos", "Dias desde a última movimentação", "Status"],
+        colunas: ["Barril", "Chopp", "Ciclos", "Dias desde a última movimentação", "Status"],
         linhas: (barris ?? [])
           .slice()
           .sort((a, z) => z.ciclos - a.ciclos)
@@ -125,7 +125,7 @@ function RelatoriosPage() {
       mapa.set(i.produto_id, atual);
     }
     return {
-      colunas: ["Chope", "Barris", "Receita potencial", "Custo", "Margem"],
+      colunas: ["Chopp", "Barris", "Receita potencial", "Custo", "Margem"],
       linhas: [...mapa.entries()]
         .sort((a, z) => z[1].receita - a[1].receita)
         .map(([id, v]) => [

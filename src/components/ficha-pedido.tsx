@@ -40,7 +40,7 @@ export function FichaPedidoPrint({ empresa, pedido }: { empresa: FichaEmpresa | 
   return (
     <div id="ficha-print" className="ficha">
       <header className="ficha-cabecalho">
-        <h1>{empresa?.nome ?? "Distribuidora de chope"}</h1>
+        <h1>{empresa?.nome ?? "Distribuidora de chopp"}</h1>
         {empresa?.telefone ? <p>WhatsApp: {empresa.telefone}</p> : null}
         <p>
           {empresa?.endereco ?? ""}

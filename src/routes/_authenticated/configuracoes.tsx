@@ -22,9 +22,9 @@ import { roleLabel } from "@/lib/labels";
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({
     meta: [
-      { title: "Configurações — ChopeControl" },
+      { title: "Configurações — V-Chopp" },
       { name: "description", content: "Dados da empresa, parâmetros de alerta e perfis de acesso da equipe." },
-      { property: "og:title", content: "Configurações — ChopeControl" },
+      { property: "og:title", content: "Configurações — V-Chopp" },
       { property: "og:description", content: "Empresa, alertas de barril parado e higienização, usuários e perfis." },
     ],
   }),

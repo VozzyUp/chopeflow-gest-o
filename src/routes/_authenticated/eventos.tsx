@@ -27,9 +27,9 @@ import { locacaoStatusLabel, statusTone } from "@/lib/labels";
 export const Route = createFileRoute("/_authenticated/eventos")({
   head: () => ({
     meta: [
-      { title: "Eventos e locações — ChopeControl" },
+      { title: "Eventos e locações — V-Chopp" },
       { name: "description", content: "Calendário de eventos, orçamentos, entrega, coleta e controle de caução." },
-      { property: "og:title", content: "Eventos e locações — ChopeControl" },
+      { property: "og:title", content: "Eventos e locações — V-Chopp" },
       { property: "og:description", content: "Do orçamento ao acerto final do evento, com checklist de entrega e coleta." },
     ],
   }),

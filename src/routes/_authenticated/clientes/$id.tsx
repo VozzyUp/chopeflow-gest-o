@@ -30,9 +30,9 @@ import {
 export const Route = createFileRoute("/_authenticated/clientes/$id")({
   head: () => ({
     meta: [
-      { title: "Ficha do cliente — ChopeControl" },
+      { title: "Ficha do cliente — V-Chopp" },
       { name: "description", content: "Ativos em poder do cliente, histórico, consignações e financeiro." },
-      { property: "og:title", content: "Ficha do cliente — ChopeControl" },
+      { property: "og:title", content: "Ficha do cliente — V-Chopp" },
       { property: "og:description", content: "Barris, chopeiras, consignações abertas e financeiro do cliente." },
     ],
   }),
@@ -154,7 +154,7 @@ function FichaCliente() {
                 <thead>
                   <tr>
                     <Th>Código</Th>
-                    <Th>Chope</Th>
+                    <Th>Chopp</Th>
                     <Th>Status</Th>
                     <Th>Dias com o cliente</Th>
                   </tr>
@@ -276,7 +276,7 @@ function FichaCliente() {
             <Table>
               <thead>
                 <tr>
-                  <Th>Chope</Th>
+                  <Th>Chopp</Th>
                   <Th>Entregues</Th>
                   <Th>Acertados</Th>
                   <Th>Em aberto</Th>

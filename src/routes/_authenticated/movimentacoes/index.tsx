@@ -57,9 +57,9 @@ function FotosRomaneio({ movimentacaoId }: { movimentacaoId: string }) {
 export const Route = createFileRoute("/_authenticated/movimentacoes/")({
   head: () => ({
     meta: [
-      { title: "Histórico de movimentações — ChopeControl" },
+      { title: "Histórico de movimentações — V-Chopp" },
       { name: "description", content: "Todos os romaneios de entrega, coleta, troca e venda, com estorno auditável." },
-      { property: "og:title", content: "Histórico de movimentações — ChopeControl" },
+      { property: "og:title", content: "Histórico de movimentações — V-Chopp" },
       { property: "og:description", content: "Romaneios de entrega e coleta com itens, valores e estornos registrados." },
     ],
   }),

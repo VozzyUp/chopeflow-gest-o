@@ -27,9 +27,9 @@ import { consignacaoStatusLabel, statusTone } from "@/lib/labels";
 export const Route = createFileRoute("/_authenticated/consignacoes")({
   head: () => ({
     meta: [
-      { title: "Consignação e acertos — ChopeControl" },
+      { title: "Consignação e acertos — V-Chopp" },
       { name: "description", content: "Barris consignados por cliente, dias em aberto e geração do acerto." },
-      { property: "og:title", content: "Consignação e acertos — ChopeControl" },
+      { property: "og:title", content: "Consignação e acertos — V-Chopp" },
       { property: "og:description", content: "Consignado não é vendido: a receita nasce no acerto, que gera a conta a receber." },
     ],
   }),
@@ -176,7 +176,7 @@ function ConsignacoesPage() {
             <thead>
               <tr>
                 <Th>Cliente</Th>
-                <Th>Chope</Th>
+                <Th>Chopp</Th>
                 <Th>Entregues</Th>
                 <Th>Acertados</Th>
                 <Th>Em aberto</Th>
@@ -226,7 +226,7 @@ function ConsignacoesPage() {
         <Table>
           <thead>
             <tr>
-              <Th>Chope</Th>
+              <Th>Chopp</Th>
               <Th>Em aberto</Th>
               <Th>Preço</Th>
               <Th>Consumidos</Th>

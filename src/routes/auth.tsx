@@ -9,15 +9,15 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Entrar — ChopeControl" },
+      { title: "Entrar — V-Chopp" },
       {
         name: "description",
-        content: "Acesse o ChopeControl para gerenciar barris, chopeiras, consignações e o financeiro da sua distribuidora de chope.",
+        content: "Acesse o V-Chopp para gerenciar barris, chopeiras, consignações e o financeiro da sua distribuidora de chopp.",
       },
-      { property: "og:title", content: "Entrar — ChopeControl" },
+      { property: "og:title", content: "Entrar — V-Chopp" },
       {
         property: "og:description",
-        content: "Gestão completa de distribuidora de chope: barris na rua, comodato, consignação e financeiro.",
+        content: "Gestão completa de distribuidora de chopp: barris na rua, comodato, consignação e financeiro.",
       },
     ],
   }),
@@ -90,10 +90,10 @@ function AuthPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <p className="font-display text-4xl font-bold tracking-tight">
-            <span className="text-gradient-amber">Chope</span>Control
+            <span className="text-gradient-amber">V</span>-Chopp
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Gestão de distribuidora de chope — barris, chopeiras e financeiro em um só lugar.
+            Gestão de distribuidora de chopp — barris, chopeiras e financeiro em um só lugar.
           </p>
         </div>
 

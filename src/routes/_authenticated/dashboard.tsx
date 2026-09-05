@@ -25,9 +25,9 @@ import { brl, dataBr, diasDesde, num } from "@/lib/format";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — ChopeControl" },
+      { title: "Dashboard — V-Chopp" },
       { name: "description", content: "Visão geral de barris na rua, chopeiras, faturamento e contas a receber." },
-      { property: "og:title", content: "Dashboard — ChopeControl" },
+      { property: "og:title", content: "Dashboard — V-Chopp" },
       { property: "og:description", content: "Barris na rua, chopeiras em comodato, total a receber e faturamento do mês." },
     ],
   }),
@@ -115,7 +115,7 @@ function Dashboard() {
     <>
       <PageHead
         title="Dashboard"
-        subtitle={empresa?.nome ?? "Distribuidora de chope"}
+        subtitle={empresa?.nome ?? "Distribuidora de chopp"}
         actions={
           <Link
             to="/movimentacoes/nova"
@@ -187,7 +187,7 @@ function Dashboard() {
           <CardTitle>Estoque abaixo do mínimo</CardTitle>
           <div className="mt-3 space-y-2 text-sm">
             {estoqueBaixo.length === 0 ? (
-              <p className="text-muted-foreground">Todos os chopes acima do mínimo.</p>
+              <p className="text-muted-foreground">Todos os chopps acima do mínimo.</p>
             ) : (
               estoqueBaixo.map((p) => (
                 <div key={p.id} className="flex justify-between">

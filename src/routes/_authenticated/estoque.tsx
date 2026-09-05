@@ -38,9 +38,9 @@ import { barrilStatusLabel, chopeiraStatusLabel, cilindroStatusLabel, statusTone
 export const Route = createFileRoute("/_authenticated/estoque")({
   head: () => ({
     meta: [
-      { title: "Estoque e ativos — ChopeControl" },
+      { title: "Estoque e ativos — V-Chopp" },
       { name: "description", content: "Barris por status e produto, chopeiras por cliente e cilindros de CO2." },
-      { property: "og:title", content: "Estoque e ativos — ChopeControl" },
+      { property: "og:title", content: "Estoque e ativos — V-Chopp" },
       { property: "og:description", content: "Ciclo de vida dos vasilhames, mapa de chopeiras e controle de cilindros." },
     ],
   }),
@@ -77,7 +77,7 @@ function EstoquePage() {
 
   const criarEntrada = useMutation({
     mutationFn: async () => {
-      if (!entrada.produto_id) throw new Error("Escolha o chope recebido");
+      if (!entrada.produto_id) throw new Error("Escolha o chopp recebido");
       const { error } = await supabase.from("movimentacao_estoque_chope").insert({
         produto_id: entrada.produto_id,
         quantidade: Number(entrada.quantidade),
@@ -110,7 +110,7 @@ function EstoquePage() {
 
   function exportarResumo() {
     const linhas = [
-      ["Chope", "Recebido", "Retirado", "Em estoque", "Estoque minimo"],
+      ["Chopp", "Recebido", "Retirado", "Em estoque", "Estoque minimo"],
       ...resumoProdutos.map((r) => [
         r.produto.nome,
         String(r.recebido),
@@ -123,7 +123,7 @@ function EstoquePage() {
     const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = "estoque-chope.csv";
+    a.download = "estoque-chopp.csv";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -213,7 +213,7 @@ function EstoquePage() {
                   ))}
                 </Select>
               </Field>
-              <Field label="Chope">
+              <Field label="Chopp">
                 <Select value={produtoFiltro} onChange={(e) => setProdutoFiltro(e.target.value)}>
                   <option value="">Todos</option>
                   {(produtos ?? []).map((p) => (
@@ -233,7 +233,7 @@ function EstoquePage() {
                 <thead>
                   <tr>
                     <Th>Código</Th>
-                    <Th>Chope</Th>
+                    <Th>Chopp</Th>
                     <Th>Volume</Th>
                     <Th>Status</Th>
                     <Th className="hidden md:table-cell">Cliente</Th>
@@ -358,7 +358,7 @@ function EstoquePage() {
         <>
           <Card className="mb-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <CardTitle>Recebimento x retirada por chope</CardTitle>
+              <CardTitle>Recebimento x retirada por chopp</CardTitle>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={exportarResumo}>
                   Exportar CSV
@@ -369,7 +369,7 @@ function EstoquePage() {
             <Table className="mt-3">
               <thead>
                 <tr>
-                  <Th>Chope</Th>
+                  <Th>Chopp</Th>
                   <Th>Recebido do fabricante</Th>
                   <Th>Retirado / entregue</Th>
                   <Th>Cheios em estoque</Th>
@@ -403,7 +403,7 @@ function EstoquePage() {
                 <thead>
                   <tr>
                     <Th>Data</Th>
-                    <Th>Chope</Th>
+                    <Th>Chopp</Th>
                     <Th>Barris</Th>
                     <Th className="hidden sm:table-cell">Custo unit.</Th>
                     <Th className="hidden md:table-cell">Nota fiscal</Th>
@@ -436,7 +436,7 @@ function EstoquePage() {
               <thead>
                 <tr>
                   <Th>Cliente</Th>
-                  <Th>Chope</Th>
+                  <Th>Chopp</Th>
                   <Th>Cheios</Th>
                   <Th>Vazios</Th>
                 </tr>
@@ -464,7 +464,7 @@ function EstoquePage() {
             criarEntrada.mutate();
           }}
         >
-          <Field label="Chope recebido">
+          <Field label="Chopp recebido">
             <Select
               value={entrada.produto_id}
               onChange={(e) => setEntrada((a) => ({ ...a, produto_id: e.target.value }))}
@@ -536,9 +536,9 @@ function EstoquePage() {
               placeholder="BR-041"
             />
           </Field>
-          <Field label="Chope">
+          <Field label="Chopp">
             <Select value={ajuste.produto_id} onChange={(e) => setAjuste((a) => ({ ...a, produto_id: e.target.value }))}>
-              <option value="">Sem chope definido</option>
+              <option value="">Sem chopp definido</option>
               {(produtos ?? []).map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.nome}

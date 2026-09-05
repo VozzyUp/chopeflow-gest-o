@@ -36,9 +36,9 @@ import { contaStatusLabel, statusTone } from "@/lib/labels";
 export const Route = createFileRoute("/_authenticated/financeiro")({
   head: () => ({
     meta: [
-      { title: "Financeiro — ChopeControl" },
+      { title: "Financeiro — V-Chopp" },
       { name: "description", content: "Contas a receber, pagamentos parciais, DRE simplificado e fluxo previsto." },
-      { property: "og:title", content: "Financeiro — ChopeControl" },
+      { property: "og:title", content: "Financeiro — V-Chopp" },
       { property: "og:description", content: "Aberto, vencido e pago por cliente e período, com margem do mês." },
     ],
   }),
