@@ -6,7 +6,7 @@
 const TOKEN_KEY = "chopecontrol.token";
 
 type Resultado<T = unknown> = { data: T; error: { message: string } | null };
-type Filtro = { col: string; valor: unknown };
+type Filtro = { col: string; valor: unknown; op?: "eq" | "in" };
 
 function guardarToken(token: string | null) {
   if (typeof window === "undefined") return;
@@ -56,6 +56,10 @@ class Consulta implements PromiseLike<Resultado<unknown>> {
   }
   eq(col: string, valor: unknown) {
     this.filtros.push({ col, valor });
+    return this;
+  }
+  in(col: string, valores: readonly unknown[]) {
+    this.filtros.push({ col, valor: [...valores], op: "in" });
     return this;
   }
   order(col: string, opts?: { ascending?: boolean }) {

@@ -97,7 +97,7 @@ function coluna(nome: unknown): string {
 
 /* ===================== operações genéricas ===================== */
 
-export type DbFiltro = { col: string; valor: unknown };
+export type DbFiltro = { col: string; valor: unknown; op?: "eq" | "in" };
 export type DbPedido = {
   table: string;
   action: "select" | "insert" | "update" | "delete";
@@ -110,8 +110,24 @@ export type DbPedido = {
 
 function onde(filters: DbFiltro[] = []): { sql: string; params: unknown[] } {
   if (!filters.length) return { sql: "", params: [] };
-  const partes = filters.map((f) => `${coluna(f.col)} <=> ?`);
-  return { sql: ` WHERE ${partes.join(" AND ")}`, params: filters.map((f) => f.valor) };
+  const partes: string[] = [];
+  const params: unknown[] = [];
+  for (const f of filters) {
+    if (f.op === "in") {
+      const lista = Array.isArray(f.valor) ? f.valor : [];
+      // IN () é erro de sintaxe no MySQL; lista vazia não casa com nada.
+      if (!lista.length) {
+        partes.push("1 = 0");
+        continue;
+      }
+      partes.push(`${coluna(f.col)} IN (${lista.map(() => "?").join(", ")})`);
+      params.push(...lista.map(normalizarValor));
+    } else {
+      partes.push(`${coluna(f.col)} <=> ?`);
+      params.push(f.valor);
+    }
+  }
+  return { sql: ` WHERE ${partes.join(" AND ")}`, params };
 }
 
 function normalizarValor(v: unknown): unknown {
