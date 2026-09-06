@@ -96,10 +96,13 @@ function EventosPage() {
       // Ao finalizar: cobra barris consumidos + locação e devolve a caução
       if (status === "FINALIZADO") {
         const { data: itens } = await supabase.from("locacao_itens").select("*").eq("locacao_id", loc.id);
-        const consumo = (itens ?? []).reduce(
-          (s, i) => s + Number(i.quantidade_consumida || i.quantidade) * Number(i.preco_unitario),
-          0,
-        );
+        // O mysql2 devolve DECIMAL como string, e "0.00" é truthy: o fallback
+        // nunca disparava em produção e o consumo era cobrado como zero.
+        const consumo = (itens ?? []).reduce((s, i) => {
+          const c = i.quantidade_consumida;
+          const qtd = c === null || c === undefined ? Number(i.quantidade) : Number(c);
+          return s + qtd * Number(i.preco_unitario);
+        }, 0);
         const total = consumo + Number(loc.valor_locacao) + Number(loc.taxa_entrega);
         const { error: contaErr } = await supabase.from("contas_receber").insert({
           origem: "locacao",

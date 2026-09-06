@@ -6,6 +6,21 @@ export function brl(value: number | null | undefined): string {
   });
 }
 
+/**
+ * Converte entrada de formulário em número, sem surpresa.
+ *
+ * Number("") é 0 e Number("abc") é NaN — os dois passavam direto para o banco.
+ * Aceita vírgula porque é o que o usuário brasileiro digita.
+ */
+export function numeroSeguro(valor: unknown, minimo = Number.NEGATIVE_INFINITY): number {
+  if (typeof valor === "number") return Number.isFinite(valor) ? Math.max(minimo, valor) : minimo === Number.NEGATIVE_INFINITY ? 0 : minimo;
+  const texto = String(valor ?? "").trim().replace(",", ".");
+  if (!texto) return minimo === Number.NEGATIVE_INFINITY ? 0 : minimo;
+  const n = Number(texto);
+  if (!Number.isFinite(n)) return minimo === Number.NEGATIVE_INFINITY ? 0 : minimo;
+  return Math.max(minimo, n);
+}
+
 export function num(value: number | null | undefined, digits = 0): string {
   return (value ?? 0).toLocaleString("pt-BR", {
     minimumFractionDigits: digits,

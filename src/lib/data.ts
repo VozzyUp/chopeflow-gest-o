@@ -84,6 +84,19 @@ export type Consignacao = {
   status: string;
 };
 
+/**
+ * Título vencido, calculado na hora.
+ *
+ * O status gravado só é avaliado pelos triggers no INSERT/UPDATE da própria
+ * linha, e nada reavalia depois: uma conta criada como ABERTO continua ABERTO
+ * para sempre, mesmo vencida. Era por isso que a inadimplência aparecia zerada.
+ */
+export function estaVencida(conta: ContaReceber, hoje: string): boolean {
+  if (conta.status === "PAGO") return false;
+  if (Number(conta.saldo ?? 0) <= 0) return false;
+  return String(conta.vencimento ?? "").slice(0, 10) < hoje;
+}
+
 export type ContaReceber = {
   id: string;
   origem: string;

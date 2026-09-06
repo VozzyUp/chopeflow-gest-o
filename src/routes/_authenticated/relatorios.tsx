@@ -12,8 +12,9 @@ import {
   useMovimentacaoItens,
   useMovimentacoes,
   useProdutos,
+  estaVencida,
 } from "@/lib/data";
-import { brl, dataBr, diasDesde, num } from "@/lib/format";
+import { brl, dataBr, dataHoje, diasDesde, num } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
@@ -101,7 +102,7 @@ function RelatoriosPage() {
       return {
         colunas: ["Cliente", "Título", "Vencimento", "Dias em atraso", "Saldo"],
         linhas: (contas ?? [])
-          .filter((c) => c.status === "VENCIDO")
+          .filter((c) => estaVencida(c, dataHoje()))
           .sort((a, z) => a.vencimento.localeCompare(z.vencimento))
           .map((c) => [
             nomeCliente(clientes, c.cliente_id),
@@ -173,7 +174,7 @@ function RelatoriosPage() {
             Barris na rua: {(barris ?? []).filter((b) => b.cliente_id).length}
           </Badge>
           <Badge tone="danger">
-            Títulos vencidos: {(contas ?? []).filter((c) => c.status === "VENCIDO").length}
+            Títulos vencidos: {(contas ?? []).filter((c) => estaVencida(c, dataHoje())).length}
           </Badge>
         </div>
       </Card>

@@ -19,8 +19,9 @@ import {
   useMovimentacaoItens,
   useMovimentacoes,
   useProdutos,
+  estaVencida,
 } from "@/lib/data";
-import { brl, dataBr, diasDesde, num } from "@/lib/format";
+import { brl, dataBr, dataHoje, diasDesde, num } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -53,7 +54,7 @@ function Dashboard() {
 
   const aReceber = (contas ?? []).filter((c) => c.status !== "PAGO");
   const totalReceber = aReceber.reduce((s, c) => s + Number(c.saldo), 0);
-  const vencido = aReceber.filter((c) => c.status === "VENCIDO");
+  const vencido = aReceber.filter((c) => estaVencida(c, dataHoje()));
   const totalVencido = vencido.reduce((s, c) => s + Number(c.saldo), 0);
 
   const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();

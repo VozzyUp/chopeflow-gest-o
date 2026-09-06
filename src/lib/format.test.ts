@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { dataBr, dataHoje, inputDate } from "./format";
+import { dataBr, dataHoje, inputDate, numeroSeguro } from "./format";
 
 describe("dataHoje", () => {
   afterEach(() => vi.useRealTimers());
@@ -47,5 +47,28 @@ describe("inputDate", () => {
   it("devolve string vazia para valor ausente", () => {
     expect(inputDate(null)).toBe("");
     expect(inputDate("banana")).toBe("");
+  });
+});
+
+describe("numeroSeguro", () => {
+  it("aceita vírgula, que é como o brasileiro digita", () => {
+    expect(numeroSeguro("1,5")).toBe(1.5);
+    expect(numeroSeguro("1.5")).toBe(1.5);
+  });
+
+  it("campo vazio vira 0 em vez de NaN", () => {
+    expect(numeroSeguro("")).toBe(0);
+    expect(numeroSeguro(null)).toBe(0);
+  });
+
+  it("texto inválido nunca vira NaN", () => {
+    expect(numeroSeguro("abc")).toBe(0);
+    expect(numeroSeguro(NaN)).toBe(0);
+  });
+
+  it("respeita o mínimo (bloqueia negativo em preço e quantidade)", () => {
+    expect(numeroSeguro("-5", 0)).toBe(0);
+    expect(numeroSeguro("-5")).toBe(-5);
+    expect(numeroSeguro("", 1)).toBe(1);
   });
 });

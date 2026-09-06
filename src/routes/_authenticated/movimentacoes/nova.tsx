@@ -17,15 +17,20 @@ import {
   Textarea,
 } from "@/components/ui/primitives";
 import {
+  nomeProduto,
   useBarris,
   useChopeiras,
   useCilindros,
   useClientes,
   useContas,
   useEmpresa,
+  useEntradasEstoque,
+  useMovimentacaoItens,
+  useMovimentacoes,
   useProdutos,
 } from "@/lib/data";
-import { brl, dataBr, dataHoje, dataHoraBr, num } from "@/lib/format";
+import { estoquePorProduto } from "@/lib/estoque";
+import { brl, dataBr, dataHoje, dataHoraBr, num, numeroSeguro } from "@/lib/format";
 import { clienteStatusLabel, movNaturezaLabel, movTipoLabel } from "@/lib/labels";
 import { anexarFotoMovimentacao, registrarMovimentacao, type LinhaProduto } from "@/lib/movimentacao";
 
@@ -71,6 +76,9 @@ function NovaMovimentacaoPage() {
   const { data: cilindros } = useCilindros();
   const { data: contas } = useContas();
   const { data: empresa } = useEmpresa();
+  const { data: entradas } = useEntradasEstoque();
+  const { data: movItens } = useMovimentacaoItens();
+  const { data: movimentacoes } = useMovimentacoes();
 
   const [clienteId, setClienteId] = useState("");
   const [buscaCliente, setBuscaCliente] = useState("");
@@ -115,13 +123,16 @@ function NovaMovimentacaoPage() {
       .slice(0, 8);
   }, [clientes, buscaCliente, cliente]);
 
-  const estoqueCheio = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const b of barris ?? []) {
-      if (b.status === "CHEIO_ESTOQUE" && b.produto_id) m.set(b.produto_id, (m.get(b.produto_id) ?? 0) + 1);
-    }
-    return m;
-  }, [barris]);
+  // Estoque em QUANTIDADE (entradas do fabricante menos saídas), não por código
+  // de barril: os vasilhames giram e nunca são os mesmos.
+  const estoqueCheio = useMemo(
+    () => estoquePorProduto(entradas, movItens, movimentacoes),
+    [entradas, movItens, movimentacoes],
+  );
+
+  const semEstoque = saidas.filter(
+    (l) => l.produto_id && l.quantidade > (estoqueCheio.get(l.produto_id) ?? 0),
+  );
 
   const valorTotal = natureza === "CONSIGNACAO" ? 0 : saidas.reduce((s, l) => s + l.quantidade * l.preco_unitario, 0);
   const limiteEstourado =
@@ -182,7 +193,7 @@ function NovaMovimentacaoPage() {
           const p = produtos?.find((x) => x.id === valor);
           return { ...l, produto_id: valor, preco_unitario: p ? Number(p.preco_barril) : l.preco_unitario };
         }
-        return { ...l, [campo]: Number(valor) };
+        return { ...l, [campo]: numeroSeguro(valor, 0) };
       }),
     );
   }
@@ -437,6 +448,15 @@ function NovaMovimentacaoPage() {
         {blocos.saida ? (
           <Card>
             <CardTitle>Saída — barris cheios</CardTitle>
+            {semEstoque.length > 0 ? (
+              <div className="mt-3 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning">
+                <strong>Estoque insuficiente.</strong>{" "}
+                {semEstoque
+                  .map((l) => `${nomeProduto(produtos, l.produto_id)}: pedindo ${num(l.quantidade)}, há ${num(estoqueCheio.get(l.produto_id) ?? 0)}`)
+                  .join(" · ")}
+                . O romaneio pode ser salvo assim mesmo — confira se falta lançar entrada do fabricante.
+              </div>
+            ) : null}
             <div className="mt-3 space-y-2">
               {saidas.map((l, i) => {
                 const disp = estoqueCheio.get(l.produto_id) ?? 0;

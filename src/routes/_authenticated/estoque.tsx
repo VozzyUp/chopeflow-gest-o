@@ -29,9 +29,11 @@ import {
   useClientes,
   useEntradasEstoque,
   useMovimentacaoItens,
+  useMovimentacoes,
   useProdutos,
   useSaldosCliente,
 } from "@/lib/data";
+import { estoquePorProduto } from "@/lib/estoque";
 import { brl, dataBr, dataHoje, diasDesde, num } from "@/lib/format";
 import { barrilStatusLabel, chopeiraStatusLabel, cilindroStatusLabel, statusTone } from "@/lib/labels";
 
@@ -74,6 +76,7 @@ function EstoquePage() {
   const { data: saldos } = useSaldosCliente();
   const { data: entradas } = useEntradasEstoque();
   const { data: movItens } = useMovimentacaoItens();
+  const { data: movimentacoes } = useMovimentacoes();
 
   const criarEntrada = useMutation({
     mutationFn: async () => {
@@ -97,15 +100,21 @@ function EstoquePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // "Cheios em estoque" contava linhas da tabela `barris`, que a entrada do
+  // fabricante nunca criava — a coluna vivia zerada. Como os vasilhames giram e
+  // não são rastreados por código, o que vale é entradas menos saídas.
+  const estoqueCheio = estoquePorProduto(entradas, movItens, movimentacoes);
+  const estornadas = new Set((movimentacoes ?? []).filter((m) => m.estornada).map((m) => m.id));
+
   const resumoProdutos = (produtos ?? []).map((p) => {
     const recebido = (entradas ?? [])
       .filter((e) => e.produto_id === p.id)
       .reduce((s, e) => s + Number(e.quantidade), 0);
     const retirado = (movItens ?? [])
       .filter((i) => i.categoria === "BARRIL_CHEIO" && i.produto_id === p.id)
+      .filter((i) => !estornadas.has(i.movimentacao_id))
       .reduce((s, i) => s + Number(i.quantidade), 0);
-    const emEstoque = (barris ?? []).filter((b) => b.produto_id === p.id && b.status === "CHEIO_ESTOQUE").length;
-    return { produto: p, recebido, retirado, emEstoque };
+    return { produto: p, recebido, retirado, emEstoque: estoqueCheio.get(p.id) ?? 0 };
   });
 
   function exportarResumo() {

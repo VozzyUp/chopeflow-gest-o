@@ -29,8 +29,9 @@ import {
   useMovimentacaoItens,
   useMovimentacoes,
   type ContaReceber,
+  estaVencida,
 } from "@/lib/data";
-import { brl, dataBr, dataHoje, num } from "@/lib/format";
+import { brl, dataBr, dataHoje, num, numeroSeguro } from "@/lib/format";
 import { contaStatusLabel, statusTone } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
@@ -66,6 +67,12 @@ function FinanceiroPage() {
     mutationFn: async () => {
       if (!conta) throw new Error("Título inválido");
       if (valor <= 0) throw new Error("Informe o valor recebido");
+      if (conta.status === "PAGO") throw new Error("Este título já está quitado");
+      // O trigger aplica GREATEST(valor_total - valor_pago, 0): o excedente sumia sem registro.
+      const saldoTitulo = Number(conta.saldo ?? 0);
+      if (valor > saldoTitulo) {
+        throw new Error(`Valor acima do saldo do título (${brl(saldoTitulo)}).`);
+      }
       const { error } = await supabase.from("pagamentos").insert({
         conta_id: conta.id,
         valor,
@@ -92,7 +99,9 @@ function FinanceiroPage() {
   });
 
   const totalAberto = (contas ?? []).filter((c) => c.status !== "PAGO").reduce((s, c) => s + Number(c.saldo), 0);
-  const totalVencido = (contas ?? []).filter((c) => c.status === "VENCIDO").reduce((s, c) => s + Number(c.saldo), 0);
+  const totalVencido = (contas ?? [])
+    .filter((c) => estaVencida(c, dataHoje()))
+    .reduce((s, c) => s + Number(c.saldo), 0);
   const totalRecebido = (pagamentos ?? []).reduce((s, p) => s + Number(p.valor), 0);
 
   // DRE simplificado do mês
@@ -267,7 +276,7 @@ function FinanceiroPage() {
               {nomeCliente(clientes, conta.cliente_id)} · saldo atual <strong>{brl(conta.saldo)}</strong>
             </p>
             <Field label="Valor recebido (R$)">
-              <Input type="number" step="0.01" value={valor} onChange={(e) => setValor(Number(e.target.value))} />
+              <Input type="number" step="0.01" value={valor} onChange={(e) => setValor(numeroSeguro(e.target.value, 0))} />
             </Field>
             <Field label="Forma">
               <Select value={forma} onChange={(e) => setForma(e.target.value)}>

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/db/client";
 import { nomeCliente, nomeProduto, useClientes, useConsignacoes, useProdutos } from "@/lib/data";
-import { brl, dataBr, dataHoje, diasDesde, num } from "@/lib/format";
+import { brl, dataBr, dataHoje, diasDesde, num, numeroSeguro } from "@/lib/format";
 import { consignacaoStatusLabel, statusTone } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/consignacoes")({
@@ -251,7 +251,9 @@ function ConsignacoesPage() {
                       className="h-9 w-24"
                       value={qtd}
                       onChange={(e) =>
-                        setQuantidades((q) => ({ ...q, [c.id]: Math.min(aberto, Number(e.target.value)) }))
+                        // Sem o piso em 0 dava para digitar negativo: o valor bruto caía,
+                        // mas o loop de gravação pula qtd <= 0 e o item não era acertado.
+                        setQuantidades((q) => ({ ...q, [c.id]: Math.min(aberto, numeroSeguro(e.target.value, 0)) }))
                       }
                     />
                   </Td>
@@ -264,7 +266,7 @@ function ConsignacoesPage() {
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label="Desconto (R$)">
-            <Input type="number" step="0.01" value={desconto} onChange={(e) => setDesconto(Number(e.target.value))} />
+            <Input type="number" step="0.01" value={desconto} onChange={(e) => setDesconto(numeroSeguro(e.target.value, 0))} />
           </Field>
           <Field label="Vencimento (dias)">
             <Input
