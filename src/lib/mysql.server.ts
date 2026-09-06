@@ -141,8 +141,28 @@ function normalizarValor(v: unknown): unknown {
   return v;
 }
 
-export async function executarPedido(pedido: DbPedido): Promise<unknown> {
+/** Tabelas que a ponte nunca pode escrever: papel de acesso se administra no banco, não pela API. */
+const SOMENTE_LEITURA = new Set(["user_roles"]);
+
+export async function executarPedido(
+  pedido: DbPedido,
+  usuario?: { sub: string },
+): Promise<unknown> {
   const t = tabela(pedido.table);
+  const escrita = pedido.action !== "select";
+
+  if (escrita && SOMENTE_LEITURA.has(pedido.table)) {
+    throw new Error(`Tabela ${pedido.table} não pode ser alterada por aqui`);
+  }
+
+  // profiles: cada um só mexe na própria linha.
+  if (escrita && pedido.table === "profiles") {
+    if (!usuario) throw new Error("Não autenticado");
+    if (pedido.action !== "update") {
+      throw new Error("Perfil não pode ser criado nem removido por aqui");
+    }
+    pedido = { ...pedido, filters: [{ col: "id", valor: usuario.sub }] };
+  }
 
   if (pedido.action === "select") {
     const w = onde(pedido.filters);
@@ -176,6 +196,8 @@ export async function executarPedido(pedido: DbPedido): Promise<unknown> {
     const cols = Object.keys(patch);
     if (!cols.length) return null;
     const w = onde(pedido.filters);
+    // Sem WHERE o UPDATE reescreve a tabela inteira — o DELETE já era protegido, este não era.
+    if (!w.sql) throw new Error("Alteração sem filtro não é permitida");
     const sql = `UPDATE ${t} SET ${cols.map((c) => `${coluna(c)} = ?`).join(", ")}${w.sql}`;
     await sqlRun(sql, [...cols.map((c) => normalizarValor(patch[c])), ...w.params]);
     if (!pedido.returning) return null;

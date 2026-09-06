@@ -30,6 +30,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [nome, setNome] = useState("");
+  const [codigo, setCodigo] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -64,7 +65,7 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signUp({
           email,
           password: senha,
-          options: { data: { nome }, emailRedirectTo: window.location.origin },
+          options: { data: { nome, codigo }, emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
         if (data.session) {
@@ -116,9 +117,19 @@ function AuthPage() {
 
           <form onSubmit={enviar} className="space-y-4">
             {modo === "cadastro" ? (
-              <Field label="Seu nome">
-                <Input value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Nome completo" />
-              </Field>
+              <>
+                <Field label="Seu nome">
+                  <Input value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Nome completo" />
+                </Field>
+                <Field label="Código de convite">
+                  <Input
+                    value={codigo}
+                    onChange={(e) => setCodigo(e.target.value)}
+                    required
+                    placeholder="Peça ao administrador"
+                  />
+                </Field>
+              </>
             ) : null}
             <Field label="E-mail">
               <Input

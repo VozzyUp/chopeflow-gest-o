@@ -10,7 +10,7 @@ export const Route = createFileRoute("/api/auth")({
           return Response.json({ error: "Banco MySQL não configurado" }, { status: 501 });
         }
 
-        let body: { action?: string; email?: string; senha?: string; nome?: string; token?: string };
+        let body: { action?: string; email?: string; senha?: string; nome?: string; token?: string; codigo?: string };
         try {
           body = (await request.json()) as typeof body;
         } catch {
@@ -22,11 +22,20 @@ export const Route = createFileRoute("/api/auth")({
 
         try {
           if (body.action === "signup") {
-            if (!email || senha.length < 6) {
-              return Response.json({ error: "Informe e-mail e senha com pelo menos 6 caracteres" }, { status: 400 });
+            // Cadastro é fechado: sem CODIGO_CADASTRO definido no painel, ninguém se registra.
+            // Antes disso qualquer pessoa da internet criava conta e ganhava acesso à base.
+            const codigoEsperado = process.env["CODIGO_CADASTRO"] ?? "";
+            if (!codigoEsperado || (body.codigo ?? "") !== codigoEsperado) {
+              return Response.json({ error: "Cadastro indisponível. Fale com o administrador." }, { status: 403 });
+            }
+            if (!email || senha.length < 8) {
+              return Response.json({ error: "Informe e-mail e senha com pelo menos 8 caracteres" }, { status: 400 });
             }
             const existentes = await mod.sqlRows<{ id: string }>("SELECT id FROM app_users WHERE email = ?", [email]);
-            if (existentes.length) return Response.json({ error: "E-mail já cadastrado" }, { status: 409 });
+            // Mensagem genérica: dizer "já cadastrado" permite descobrir quem tem conta.
+            if (existentes.length) {
+              return Response.json({ error: "Não foi possível criar a conta." }, { status: 409 });
+            }
 
             const id = crypto.randomUUID();
             const nome = (body.nome ?? "").trim() || email.split("@")[0];

@@ -14,11 +14,12 @@ export const Route = createFileRoute("/api/db")({
 
         try {
           const pedido = (await request.json()) as Parameters<typeof executarPedido>[0];
-          const data = await executarPedido(pedido);
+          const data = await executarPedido(pedido, usuario);
           return Response.json({ data });
         } catch (e) {
-          const message = e instanceof Error ? e.message : "Erro ao consultar o banco";
-          return Response.json({ error: message }, { status: 400 });
+          // O erro cru do MySQL revela o esquema do banco; fica no log do servidor.
+          console.error("[api/db]", e);
+          return Response.json({ error: "Não foi possível concluir a operação." }, { status: 400 });
         }
       },
     },

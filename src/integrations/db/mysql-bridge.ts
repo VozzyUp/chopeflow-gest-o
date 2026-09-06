@@ -149,8 +149,14 @@ export const mysqlBridge = {
       return { data: { session: sessao, user: json.user }, error: null };
     },
 
-    async signUp({ email, password, options }: { email: string; password: string; options?: { data?: { nome?: string } } }) {
-      const json = await chamarAuth({ action: "signup", email, senha: password, nome: options?.data?.nome });
+    async signUp({ email, password, options }: { email: string; password: string; options?: { data?: { nome?: string; codigo?: string } } }) {
+      const json = await chamarAuth({
+        action: "signup",
+        email,
+        senha: password,
+        nome: options?.data?.nome,
+        codigo: options?.data?.codigo,
+      });
       if (json.error || !json.token) return { data: { session: null }, error: { message: json.error ?? "Erro" } };
       guardarToken(json.token);
       const sessao = { access_token: json.token, user: json.user };
