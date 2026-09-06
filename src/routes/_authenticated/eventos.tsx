@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/db/client";
 import { nomeCliente, useClientes, useLocacoes, useProdutos, type Locacao } from "@/lib/data";
-import { brl, dataBr, dataHoraBr } from "@/lib/format";
+import { brl, dataBr, dataHoje, dataHoraBr } from "@/lib/format";
 import { locacaoStatusLabel, statusTone } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/eventos")({
@@ -83,6 +83,10 @@ function EventosPage() {
 
   const mudarStatus = useMutation({
     mutationFn: async ({ loc, status }: { loc: Locacao; status: string }) => {
+      // Finalizar duas vezes gerava duas contas a receber para o mesmo evento.
+      if (status === "FINALIZADO" && (loc.status === "FINALIZADO" || loc.caucao_devolvida)) {
+        throw new Error("Este evento já foi finalizado");
+      }
       const patch: Record<string, unknown> = { status };
       if (status === "ENTREGUE") patch["data_entrega"] = new Date().toISOString();
       if (status === "COLETADO") patch["data_coleta"] = new Date().toISOString();
@@ -103,7 +107,7 @@ function EventosPage() {
           locacao_id: loc.id,
           descricao: `Acerto final do evento de ${dataBr(loc.data_evento)}`,
           valor_total: total,
-          vencimento: new Date().toISOString().slice(0, 10),
+          vencimento: dataHoje(),
         });
         if (contaErr) throw contaErr;
         const { error: caucaoErr } = await supabase
@@ -248,6 +252,7 @@ function EventosPage() {
                     <Select
                       value=""
                       className="h-9 w-36"
+                      disabled={mudarStatus.isPending}
                       onChange={(e) => e.target.value && mudarStatus.mutate({ loc: l, status: e.target.value })}
                     >
                       <option value="">Alterar...</option>

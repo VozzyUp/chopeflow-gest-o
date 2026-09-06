@@ -15,9 +15,19 @@ export function num(value: number | null | undefined, digits = 0): string {
 
 export function dataBr(value: string | Date | null | undefined): string {
   if (!value) return "—";
+  // "2026-09-06" vira meia-noite UTC, que no Brasil ainda é dia 5: formatar direto.
+  if (typeof value === "string") {
+    const puro = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (puro) return `${puro[3]}/${puro[2]}/${puro[1]}`;
+  }
   const d = typeof value === "string" ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  return d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  });
 }
 
 export function dataHoraBr(value: string | Date | null | undefined): string {
@@ -30,6 +40,7 @@ export function dataHoraBr(value: string | Date | null | undefined): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "America/Sao_Paulo",
   });
 }
 
@@ -52,7 +63,11 @@ export function dataHoje(dias = 0): string {
 
 export function inputDate(value: string | null | undefined): string {
   if (!value) return "";
-  return new Date(value).toISOString().slice(0, 10);
+  // Coluna DATE já vem como YYYY-MM-DD; converter para Date e voltar deslocaria o dia.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 }
 
 export function mesAtualRange() {

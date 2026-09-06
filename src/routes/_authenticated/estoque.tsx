@@ -32,7 +32,7 @@ import {
   useProdutos,
   useSaldosCliente,
 } from "@/lib/data";
-import { brl, dataBr, diasDesde, num } from "@/lib/format";
+import { brl, dataBr, dataHoje, diasDesde, num } from "@/lib/format";
 import { barrilStatusLabel, chopeiraStatusLabel, cilindroStatusLabel, statusTone } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/estoque")({
@@ -61,7 +61,7 @@ function EstoquePage() {
     quantidade: 1,
     custo_unitario: 0,
     nota_fiscal: "",
-    data: new Date().toISOString().slice(0, 10),
+    data: dataHoje(),
     observacao: "",
   });
 

@@ -30,7 +30,7 @@ import {
   useMovimentacoes,
   type ContaReceber,
 } from "@/lib/data";
-import { brl, dataBr, num } from "@/lib/format";
+import { brl, dataBr, dataHoje, num } from "@/lib/format";
 import { contaStatusLabel, statusTone } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
@@ -70,7 +70,7 @@ function FinanceiroPage() {
         conta_id: conta.id,
         valor,
         forma,
-        data: new Date().toISOString().slice(0, 10),
+        data: dataHoje(),
       });
       if (error) throw error;
     },

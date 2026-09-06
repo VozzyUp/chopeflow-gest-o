@@ -160,7 +160,7 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
       .update({
         status: input.natureza === "LOCACAO" ? ("EM_LOCACAO" as const) : ("EM_COMODATO" as const),
         cliente_id: input.cliente_id,
-        data_saida: new Date().toISOString().slice(0, 10),
+        data_saida: dataHoje(),
       })
       .eq("id", input.chopeiraSaida);
     if (error) throw error;
@@ -180,7 +180,7 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
       .update({
         status: "COM_CLIENTE",
         cliente_id: input.cliente_id,
-        data_saida: new Date().toISOString().slice(0, 10),
+        data_saida: dataHoje(),
       })
       .eq("id", input.cilindroSaida);
     if (error) throw error;
@@ -211,7 +211,7 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
 
   // ------- venda / locação geram conta a receber -------
   if (input.gerarContaReceber && valorTotal > 0) {
-    const venc = new Date(Date.now() + input.vencimentoDias * 86400000).toISOString().slice(0, 10);
+    const venc = dataHoje(input.vencimentoDias);
     const { error } = await supabase.from("contas_receber").insert({
       origem: input.natureza === "LOCACAO" ? "locacao" : "venda_avulsa",
       cliente_id: input.cliente_id,

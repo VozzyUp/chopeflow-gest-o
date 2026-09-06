@@ -111,7 +111,7 @@ function ConsignacoesPage() {
         acerto_id: acerto.id,
         descricao: `Acerto de consignação em ${dataBr(new Date())}`,
         valor_total: valorFinal,
-        vencimento: new Date(Date.now() + vencimentoDias * 86400000).toISOString().slice(0, 10),
+        vencimento: dataHoje(vencimentoDias),
       });
       if (contaErr) throw contaErr;
     },

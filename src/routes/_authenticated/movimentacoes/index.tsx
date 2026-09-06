@@ -166,7 +166,16 @@ function HistoricoPage() {
                           Itens
                         </Button>
                         {!m.estornada ? (
-                          <Button variant="ghost" size="sm" onClick={() => estornar.mutate(m.id)}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={estornar.isPending}
+                            onClick={() => {
+                              if (confirm("Estornar esta movimentação? Os barris voltam e o título é cancelado.")) {
+                                estornar.mutate(m.id);
+                              }
+                            }}
+                          >
                             Estornar
                           </Button>
                         ) : (

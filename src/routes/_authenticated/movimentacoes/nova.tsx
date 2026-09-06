@@ -25,7 +25,7 @@ import {
   useEmpresa,
   useProdutos,
 } from "@/lib/data";
-import { brl, dataBr, dataHoraBr, num } from "@/lib/format";
+import { brl, dataBr, dataHoje, dataHoraBr, num } from "@/lib/format";
 import { clienteStatusLabel, movNaturezaLabel, movTipoLabel } from "@/lib/labels";
 import { anexarFotoMovimentacao, registrarMovimentacao, type LinhaProduto } from "@/lib/movimentacao";
 
@@ -82,7 +82,7 @@ function NovaMovimentacaoPage() {
   const [outroEndereco, setOutroEndereco] = useState(false);
   const [enderecoEntrega, setEnderecoEntrega] = useState("");
   const [complementoEntrega, setComplementoEntrega] = useState("");
-  const [dataEntrega, setDataEntrega] = useState(new Date().toISOString().slice(0, 10));
+  const [dataEntrega, setDataEntrega] = useState(dataHoje());
   const [dataRetirada, setDataRetirada] = useState("");
   const [saidas, setSaidas] = useState<Linha[]>([]);
   const [retornos, setRetornos] = useState<Linha[]>([]);
