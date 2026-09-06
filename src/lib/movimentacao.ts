@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/db/client";
+import { dataHoje } from "@/lib/format";
 
 export type LinhaProduto = { produto_id: string; quantidade: number; preco_unitario: number };
 
@@ -201,7 +202,8 @@ export async function registrarMovimentacao(input: NovaMovimentacaoInput) {
         movimentacao_id: mov.id,
         quantidade_entregue: l.quantidade,
         preco_unitario: l.preco_unitario,
-        data_limite: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+        data_entrega: dataHoje(),
+        data_limite: dataHoje(30),
       });
       if (error) throw error;
     }

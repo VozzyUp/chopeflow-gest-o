@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/db/client";
 import { nomeCliente, nomeProduto, useClientes, useConsignacoes, useProdutos } from "@/lib/data";
-import { brl, dataBr, diasDesde, num } from "@/lib/format";
+import { brl, dataBr, dataHoje, diasDesde, num } from "@/lib/format";
 import { consignacaoStatusLabel, statusTone } from "@/lib/labels";
 
 export const Route = createFileRoute("/_authenticated/consignacoes")({
@@ -77,7 +77,8 @@ function ConsignacoesPage() {
         .insert({
           cliente_id: acertoCliente,
           periodo_inicio: doAcerto.reduce((min, c) => (c.data_entrega < min ? c.data_entrega : min), doAcerto[0]!.data_entrega),
-          periodo_fim: new Date().toISOString().slice(0, 10),
+          periodo_fim: dataHoje(),
+          data_acerto: dataHoje(),
           valor_bruto: valorBruto,
           desconto,
           valor_final: valorFinal,

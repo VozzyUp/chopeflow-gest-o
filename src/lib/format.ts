@@ -40,6 +40,16 @@ export function diasDesde(value: string | null | undefined): number {
   return Math.max(0, Math.floor((Date.now() - d) / 86400000));
 }
 
+/**
+ * Data no fuso do Brasil em YYYY-MM-DD, para colunas DATE.
+ * toISOString() devolve UTC: depois das 21h no Brasil ele já grava o dia seguinte.
+ */
+export function dataHoje(dias = 0): string {
+  return new Date(Date.now() + dias * 86400000).toLocaleDateString("en-CA", {
+    timeZone: "America/Sao_Paulo",
+  });
+}
+
 export function inputDate(value: string | null | undefined): string {
   if (!value) return "";
   return new Date(value).toISOString().slice(0, 10);
