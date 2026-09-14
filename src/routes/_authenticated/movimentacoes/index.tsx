@@ -62,6 +62,8 @@ function FotosRomaneio({ movimentacaoId }: { movimentacaoId: string }) {
   );
 }
 
+type LinhaEdit = { produto_id: string; quantidade: number; preco_unitario: number };
+
 export const Route = createFileRoute("/_authenticated/movimentacoes/")({
   head: () => ({
     meta: [
@@ -93,6 +95,9 @@ function HistoricoPage() {
 
   const [form, setForm] = useState({
     data: "",
+    cliente_id: "",
+    tipo: "",
+    natureza: "",
     endereco_entrega: "",
     complemento_entrega: "",
     data_entrega_prevista: "",
@@ -101,11 +106,16 @@ function HistoricoPage() {
     recebido_por: "",
     observacao: "",
   });
+  const [saidasEdit, setSaidasEdit] = useState<LinhaEdit[]>([]);
+  const [retornosEdit, setRetornosEdit] = useState<LinhaEdit[]>([]);
 
   useEffect(() => {
     if (!movEditar) {
       setForm({
         data: "",
+        cliente_id: "",
+        tipo: "",
+        natureza: "",
         endereco_entrega: "",
         complemento_entrega: "",
         data_entrega_prevista: "",
@@ -114,6 +124,8 @@ function HistoricoPage() {
         recebido_por: "",
         observacao: "",
       });
+      setSaidasEdit([]);
+      setRetornosEdit([]);
       return;
     }
     const toDatetimeLocal = (iso: string) => {
@@ -124,6 +136,9 @@ function HistoricoPage() {
     };
     setForm({
       data: toDatetimeLocal(movEditar.data),
+      cliente_id: movEditar.cliente_id ?? "",
+      tipo: movEditar.tipo ?? "",
+      natureza: movEditar.natureza ?? "",
       endereco_entrega: movEditar.endereco_entrega ?? "",
       complemento_entrega: movEditar.complemento_entrega ?? "",
       data_entrega_prevista: movEditar.data_entrega_prevista ? movEditar.data_entrega_prevista.slice(0, 10) : "",
@@ -132,6 +147,26 @@ function HistoricoPage() {
       recebido_por: movEditar.recebido_por ?? "",
       observacao: movEditar.observacao ?? "",
     });
+    const meusItens = (itens ?? []).filter((i) => i.movimentacao_id === movEditar.id);
+    setSaidasEdit(
+      meusItens
+        .filter((i) => i.categoria === "BARRIL_CHEIO")
+        .map((i) => ({
+          produto_id: i.produto_id ?? "",
+          quantidade: Number(i.quantidade),
+          preco_unitario: Number(i.preco_unitario),
+        })),
+    );
+    setRetornosEdit(
+      meusItens
+        .filter((i) => i.categoria === "BARRIL_VAZIO")
+        .map((i) => ({
+          produto_id: i.produto_id ?? "",
+          quantidade: Number(i.quantidade),
+          preco_unitario: 0,
+        })),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movEditar]);
 
   const salvarEdicao = useMutation({
