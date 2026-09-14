@@ -168,9 +168,9 @@
 
   .ficha-via {
     display: block;
-    padding: 7mm 11mm;
+    padding: 7mm 11mm 4mm;
     box-sizing: border-box;
-    height: 292mm;
+    height: 294mm;
     overflow: hidden;
     page-break-after: always;
   }
