@@ -409,6 +409,7 @@
 
   .ficha-clausulas p {
     margin: 0 0 2mm;
+    break-inside: avoid;
   }
 
   .ficha-assinaturas {
