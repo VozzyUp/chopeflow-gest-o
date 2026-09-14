@@ -74,19 +74,24 @@ function ConfiguracoesPage() {
 
   const salvar = useMutation({
     mutationFn: async () => {
-      if (!empresa) throw new Error("Configuração não encontrada");
-      const { error } = await supabase
-        .from("empresa_config")
-        .update({
-          nome: form.nome,
-          cnpj: form.cnpj,
-          telefone: form.telefone,
-          email: form.email,
-          endereco: form.endereco,
-          dias_alerta_barril_parado: Number(form.dias_alerta_barril_parado),
-          dias_alerta_higienizacao: Number(form.dias_alerta_higienizacao),
-        })
-        .eq("id", empresa.id);
+      const dados = {
+        nome: form.nome,
+        cnpj: form.cnpj,
+        telefone: form.telefone,
+        email: form.email,
+        endereco: form.endereco,
+        dias_alerta_barril_parado: Number(form.dias_alerta_barril_parado),
+        dias_alerta_higienizacao: Number(form.dias_alerta_higienizacao),
+      };
+      // Instalação nova ainda não tem linha de configuração: criar em vez de falhar.
+      if (!empresa) {
+        const { error } = await supabase
+          .from("empresa_config")
+          .insert({ id: crypto.randomUUID(), ...dados });
+        if (error) throw error;
+        return;
+      }
+      const { error } = await supabase.from("empresa_config").update(dados).eq("id", empresa.id);
       if (error) throw error;
     },
     onSuccess: () => {
