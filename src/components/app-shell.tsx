@@ -85,7 +85,7 @@ export function AppShell() {
           <p className="mt-1 text-xs text-muted-foreground">Distribuidora de chope</p>
         </div>
         <nav className="flex flex-col gap-1 p-3 lg:px-3 lg:py-0">
-          {nav.map((item) => {
+          {itensVisiveis.map((item) => {
             const Icon = item.icon;
             const ativo = pathname === item.to || (item.to !== "/dashboard" && pathname.startsWith(item.to));
             return (
@@ -114,7 +114,18 @@ export function AppShell() {
       </aside>
 
       <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        <Outlet />
+        {liberado ? (
+          <Outlet />
+        ) : (
+          <>
+            <PageHead title="Acesso não liberado" subtitle="Seu perfil não permite abrir esta tela" />
+            <EmptyState>
+              {meusPapeis.length === 0
+                ? "Sua conta ainda não tem perfil de acesso. Peça a um administrador para liberar."
+                : "Fale com um administrador se você precisa acessar esta tela."}
+            </EmptyState>
+          </>
+        )}
       </main>
     </div>
   );
