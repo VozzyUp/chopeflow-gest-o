@@ -87,14 +87,77 @@ function HistoricoPage() {
   const [clienteId, setClienteId] = useState("");
   const [aberta, setAberta] = useState<string | null>(null);
   const [verId, setVerId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
 
-  const estornar = useMutation({
-    mutationFn: (id: string) => estornarMovimentacao(id),
-    onSuccess: () => {
-      toast.success("Movimentação estornada (registro mantido no histórico)");
-      queryClient.invalidateQueries();
+  const movEditar = useMemo(() => (movs ?? []).find((m) => m.id === editId) ?? null, [movs, editId]);
+
+  const [form, setForm] = useState({
+    data: "",
+    endereco_entrega: "",
+    complemento_entrega: "",
+    data_entrega_prevista: "",
+    data_retirada_prevista: "",
+    responsavel: "",
+    recebido_por: "",
+    observacao: "",
+  });
+
+  useEffect(() => {
+    if (!movEditar) {
+      setForm({
+        data: "",
+        endereco_entrega: "",
+        complemento_entrega: "",
+        data_entrega_prevista: "",
+        data_retirada_prevista: "",
+        responsavel: "",
+        recebido_por: "",
+        observacao: "",
+      });
+      return;
+    }
+    const toDatetimeLocal = (iso: string) => {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+    setForm({
+      data: toDatetimeLocal(movEditar.data),
+      endereco_entrega: movEditar.endereco_entrega ?? "",
+      complemento_entrega: movEditar.complemento_entrega ?? "",
+      data_entrega_prevista: movEditar.data_entrega_prevista ? movEditar.data_entrega_prevista.slice(0, 10) : "",
+      data_retirada_prevista: movEditar.data_retirada_prevista ? movEditar.data_retirada_prevista.slice(0, 10) : "",
+      responsavel: movEditar.responsavel ?? "",
+      recebido_por: movEditar.recebido_por ?? "",
+      observacao: movEditar.observacao ?? "",
+    });
+  }, [movEditar]);
+
+  const salvarEdicao = useMutation({
+    mutationFn: async (values: typeof form & { id: string }) => {
+      const { id, ...rest } = values;
+      const { error } = await supabase
+        .from("movimentacoes")
+        .update({
+          data: new Date(rest.data).toISOString(),
+          endereco_entrega: rest.endereco_entrega || null,
+          complemento_entrega: rest.complemento_entrega || null,
+          data_entrega_prevista: rest.data_entrega_prevista || null,
+          data_retirada_prevista: rest.data_retirada_prevista || null,
+          responsavel: rest.responsavel || null,
+          recebido_por: rest.recebido_por || null,
+          observacao: rest.observacao || null,
+        })
+        .eq("id", id);
+      if (error) throw error;
     },
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: () => {
+      toast.success("Movimentação atualizada");
+      queryClient.invalidateQueries();
+      setEditId(null);
+    },
+    onError: (e: Error) => toast.error("Erro ao salvar: " + e.message),
   });
 
   const lista = (movs ?? []).filter(
