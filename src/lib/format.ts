@@ -1,5 +1,7 @@
-export function brl(value: number | null | undefined): string {
-  return (value ?? 0).toLocaleString("pt-BR", {
+export function brl(value: number | string | null | undefined): string {
+  // O MySQL devolve DECIMAL como string: sem o Number() o valor saía sem "R$".
+  const n = Number(value ?? 0);
+  return (Number.isFinite(n) ? n : 0).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
     minimumFractionDigits: 2,

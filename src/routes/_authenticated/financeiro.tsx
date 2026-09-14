@@ -46,6 +46,15 @@ export const Route = createFileRoute("/_authenticated/financeiro")({
   component: FinanceiroPage,
 });
 
+function saldoConta(c: ContaReceber): number {
+  const total = Number(c.valor_total ?? 0);
+  const pago = Number(c.valor_pago ?? 0);
+  const derivado = Math.max(total - pago, 0);
+  const armazenado = Number(c.saldo ?? 0);
+  // Sem os triggers do banco o campo "saldo" fica zerado: usa o derivado nesse caso.
+  return armazenado > 0 ? armazenado : derivado;
+}
+
 function FinanceiroPage() {
   const { data: contas } = useContas();
   const { data: clientes } = useClientes();
@@ -68,18 +77,34 @@ function FinanceiroPage() {
       if (!conta) throw new Error("Título inválido");
       if (valor <= 0) throw new Error("Informe o valor recebido");
       if (conta.status === "PAGO") throw new Error("Este título já está quitado");
-      // O trigger aplica GREATEST(valor_total - valor_pago, 0): o excedente sumia sem registro.
-      const saldoTitulo = Number(conta.saldo ?? 0);
-      if (valor > saldoTitulo) {
+      // Saldo derivado do título: o campo "saldo" fica 0 quando o banco não tem os triggers.
+      const saldoTitulo = saldoConta(conta);
+      if (valor > saldoTitulo + 0.005) {
         throw new Error(`Valor acima do saldo do título (${brl(saldoTitulo)}).`);
       }
+      const hoje = dataHoje();
       const { error } = await supabase.from("pagamentos").insert({
         conta_id: conta.id,
         valor,
         forma,
-        data: dataHoje(),
+        data: hoje,
       });
       if (error) throw error;
+
+      // Reaplica o total pago no título (garante o acerto mesmo sem triggers no banco).
+      const pago = Number(conta.valor_pago ?? 0) + valor;
+      const total = Number(conta.valor_total ?? 0);
+      const restante = Math.max(total - pago, 0);
+      const { error: upErr } = await supabase
+        .from("contas_receber")
+        .update({
+          valor_pago: pago,
+          saldo: restante,
+          data_pagamento: hoje,
+          status: restante <= 0.005 ? "PAGO" : "PARCIAL",
+        })
+        .eq("id", conta.id);
+      if (upErr) throw upErr;
     },
     onSuccess: () => {
       toast.success("Pagamento registrado");
@@ -98,10 +123,10 @@ function FinanceiroPage() {
     return true;
   });
 
-  const totalAberto = (contas ?? []).filter((c) => c.status !== "PAGO").reduce((s, c) => s + Number(c.saldo), 0);
+  const totalAberto = (contas ?? []).filter((c) => c.status !== "PAGO").reduce((s, c) => s + saldoConta(c), 0);
   const totalVencido = (contas ?? [])
     .filter((c) => estaVencida(c, dataHoje()))
-    .reduce((s, c) => s + Number(c.saldo), 0);
+    .reduce((s, c) => s + saldoConta(c), 0);
   const totalRecebido = (pagamentos ?? []).reduce((s, p) => s + Number(p.valor), 0);
 
   // DRE simplificado do mês
@@ -134,7 +159,7 @@ function FinanceiroPage() {
           const v = new Date(c.vencimento);
           return v >= ini && v < fim;
         })
-        .reduce((s, c) => s + Number(c.saldo), 0);
+        .reduce((s, c) => s + saldoConta(c), 0);
       semanas.push({ rotulo: `${dataBr(ini)} a ${dataBr(fim)}`, valor: valorSemana });
     }
     return semanas;
@@ -208,7 +233,7 @@ function FinanceiroPage() {
                   <Td className="hidden sm:table-cell text-muted-foreground">{c.origem}</Td>
                   <Td>{dataBr(c.vencimento)}</Td>
                   <Td>{brl(c.valor_total)}</Td>
-                  <Td className="font-semibold">{brl(c.saldo)}</Td>
+                  <Td className="font-semibold">{brl(saldoConta(c))}</Td>
                   <Td>
                     <Badge tone={statusTone(c.status)}>{contaStatusLabel[c.status]}</Badge>
                   </Td>
@@ -219,7 +244,7 @@ function FinanceiroPage() {
                         size="sm"
                         onClick={() => {
                           setConta(c);
-                          setValor(Number(c.saldo));
+                          setValor(saldoConta(c));
                         }}
                       >
                         Receber
@@ -273,7 +298,7 @@ function FinanceiroPage() {
             }}
           >
             <p className="text-sm text-muted-foreground">
-              {nomeCliente(clientes, conta.cliente_id)} · saldo atual <strong>{brl(conta.saldo)}</strong>
+              {nomeCliente(clientes, conta.cliente_id)} · saldo atual <strong>{brl(saldoConta(conta))}</strong>
             </p>
             <Field label="Valor recebido (R$)">
               <Input type="number" step="0.01" value={valor} onChange={(e) => setValor(numeroSeguro(e.target.value, 0))} />
