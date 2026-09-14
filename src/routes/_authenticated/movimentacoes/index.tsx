@@ -170,12 +170,20 @@ function HistoricoPage() {
   }, [movEditar]);
 
   const salvarEdicao = useMutation({
-    mutationFn: async (values: typeof form & { id: string }) => {
-      const { id, ...rest } = values;
+    mutationFn: async (values: typeof form & { id: string; saidas: LinhaEdit[]; retornos: LinhaEdit[] }) => {
+      const { id, saidas, retornos, ...rest } = values;
+      const saidasValidas = saidas.filter((l) => l.produto_id && l.quantidade > 0);
+      const retornosValidos = retornos.filter((l) => l.produto_id && l.quantidade > 0);
+      const valorTotal =
+        rest.natureza === "CONSIGNACAO" ? 0 : saidasValidas.reduce((s, l) => s + l.quantidade * l.preco_unitario, 0);
       const { error } = await supabase
         .from("movimentacoes")
         .update({
           data: new Date(rest.data).toISOString(),
+          cliente_id: rest.cliente_id,
+          tipo: rest.tipo as "ENTREGA",
+          natureza: rest.natureza as "CONSIGNACAO",
+          valor_total: valorTotal,
           endereco_entrega: rest.endereco_entrega || null,
           complemento_entrega: rest.complemento_entrega || null,
           data_entrega_prevista: rest.data_entrega_prevista || null,
@@ -186,6 +194,35 @@ function HistoricoPage() {
         })
         .eq("id", id);
       if (error) throw error;
+
+      // Substitui os itens de barril (cheio/vazio); equipamentos são mantidos.
+      const { error: delErr } = await supabase
+        .from("movimentacao_itens")
+        .delete()
+        .eq("movimentacao_id", id)
+        .in("categoria", ["BARRIL_CHEIO", "BARRIL_VAZIO"]);
+      if (delErr) throw delErr;
+
+      const novosItens = [
+        ...saidasValidas.map((l) => ({
+          movimentacao_id: id,
+          categoria: "BARRIL_CHEIO",
+          produto_id: l.produto_id,
+          quantidade: l.quantidade,
+          preco_unitario: l.preco_unitario,
+        })),
+        ...retornosValidos.map((l) => ({
+          movimentacao_id: id,
+          categoria: "BARRIL_VAZIO",
+          produto_id: l.produto_id,
+          quantidade: l.quantidade,
+          preco_unitario: 0,
+        })),
+      ];
+      if (novosItens.length) {
+        const { error: insErr } = await supabase.from("movimentacao_itens").insert(novosItens as never);
+        if (insErr) throw insErr;
+      }
     },
     onSuccess: () => {
       toast.success("Movimentação atualizada");
@@ -194,6 +231,19 @@ function HistoricoPage() {
     },
     onError: (e: Error) => toast.error("Erro ao salvar: " + e.message),
   });
+
+  function atualizarLinhaEdit(setter: typeof setSaidasEdit, i: number, campo: keyof LinhaEdit, valor: string) {
+    setter((linhas) =>
+      linhas.map((l, idx) => {
+        if (idx !== i) return l;
+        if (campo === "produto_id") {
+          const p = produtos?.find((x) => x.id === valor);
+          return { ...l, produto_id: valor, preco_unitario: p ? Number(p.preco_barril) : l.preco_unitario };
+        }
+        return { ...l, [campo]: Number(valor.replace(",", ".")) || 0 };
+      }),
+    );
+  }
 
   const lista = (movs ?? []).filter(
     (m) => (!tipo || m.tipo === tipo) && (!clienteId || m.cliente_id === clienteId),
