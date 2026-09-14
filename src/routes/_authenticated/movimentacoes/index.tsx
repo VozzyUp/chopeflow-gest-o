@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { FichaPedidoPrint } from "@/components/ficha-pedido";
@@ -10,11 +10,13 @@ import {
   Card,
   EmptyState,
   Field,
+  Input,
   Modal,
   PageHead,
   Select,
   Table,
   Td,
+  Textarea,
   Th,
 } from "@/components/ui/primitives";
 import {
@@ -31,7 +33,7 @@ import {
 import { supabase } from "@/integrations/db/client";
 import { brl, dataBr, dataHoraBr, num } from "@/lib/format";
 import { movNaturezaLabel, movTipoLabel } from "@/lib/labels";
-import { estornarMovimentacao, urlFotoMovimentacao } from "@/lib/movimentacao";
+import { urlFotoMovimentacao } from "@/lib/movimentacao";
 import { fichaDeMovimentacao, textoRomaneio, whatsappRomaneio, type DadosRomaneio } from "@/lib/romaneio";
 
 /** Fotos da entrega/instalação anexadas ao romaneio. */
