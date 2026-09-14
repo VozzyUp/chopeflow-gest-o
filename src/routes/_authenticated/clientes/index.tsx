@@ -89,6 +89,15 @@ function ClientesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const excluir = useMutation({
+    mutationFn: (id: string) => excluirRegistro("clientes", id),
+    onSuccess: () => {
+      toast.success("Cliente excluído");
+      queryClient.invalidateQueries({ queryKey: ["clientes"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const lista = useMemo(() => {
     return (clientes ?? []).filter((c) => {
       const t = busca.trim().toLowerCase();
