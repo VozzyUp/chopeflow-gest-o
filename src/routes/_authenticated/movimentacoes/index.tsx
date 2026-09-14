@@ -62,6 +62,8 @@ function FotosRomaneio({ movimentacaoId }: { movimentacaoId: string }) {
   );
 }
 
+type LinhaEdit = { produto_id: string; quantidade: number; preco_unitario: number };
+
 export const Route = createFileRoute("/_authenticated/movimentacoes/")({
   head: () => ({
     meta: [
@@ -93,6 +95,9 @@ function HistoricoPage() {
 
   const [form, setForm] = useState({
     data: "",
+    cliente_id: "",
+    tipo: "",
+    natureza: "",
     endereco_entrega: "",
     complemento_entrega: "",
     data_entrega_prevista: "",
@@ -101,11 +106,16 @@ function HistoricoPage() {
     recebido_por: "",
     observacao: "",
   });
+  const [saidasEdit, setSaidasEdit] = useState<LinhaEdit[]>([]);
+  const [retornosEdit, setRetornosEdit] = useState<LinhaEdit[]>([]);
 
   useEffect(() => {
     if (!movEditar) {
       setForm({
         data: "",
+        cliente_id: "",
+        tipo: "",
+        natureza: "",
         endereco_entrega: "",
         complemento_entrega: "",
         data_entrega_prevista: "",
@@ -114,6 +124,8 @@ function HistoricoPage() {
         recebido_por: "",
         observacao: "",
       });
+      setSaidasEdit([]);
+      setRetornosEdit([]);
       return;
     }
     const toDatetimeLocal = (iso: string) => {
@@ -124,6 +136,9 @@ function HistoricoPage() {
     };
     setForm({
       data: toDatetimeLocal(movEditar.data),
+      cliente_id: movEditar.cliente_id ?? "",
+      tipo: movEditar.tipo ?? "",
+      natureza: movEditar.natureza ?? "",
       endereco_entrega: movEditar.endereco_entrega ?? "",
       complemento_entrega: movEditar.complemento_entrega ?? "",
       data_entrega_prevista: movEditar.data_entrega_prevista ? movEditar.data_entrega_prevista.slice(0, 10) : "",
@@ -132,15 +147,43 @@ function HistoricoPage() {
       recebido_por: movEditar.recebido_por ?? "",
       observacao: movEditar.observacao ?? "",
     });
+    const meusItens = (itens ?? []).filter((i) => i.movimentacao_id === movEditar.id);
+    setSaidasEdit(
+      meusItens
+        .filter((i) => i.categoria === "BARRIL_CHEIO")
+        .map((i) => ({
+          produto_id: i.produto_id ?? "",
+          quantidade: Number(i.quantidade),
+          preco_unitario: Number(i.preco_unitario),
+        })),
+    );
+    setRetornosEdit(
+      meusItens
+        .filter((i) => i.categoria === "BARRIL_VAZIO")
+        .map((i) => ({
+          produto_id: i.produto_id ?? "",
+          quantidade: Number(i.quantidade),
+          preco_unitario: 0,
+        })),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movEditar]);
 
   const salvarEdicao = useMutation({
-    mutationFn: async (values: typeof form & { id: string }) => {
-      const { id, ...rest } = values;
+    mutationFn: async (values: typeof form & { id: string; saidas: LinhaEdit[]; retornos: LinhaEdit[] }) => {
+      const { id, saidas, retornos, ...rest } = values;
+      const saidasValidas = saidas.filter((l) => l.produto_id && l.quantidade > 0);
+      const retornosValidos = retornos.filter((l) => l.produto_id && l.quantidade > 0);
+      const valorTotal =
+        rest.natureza === "CONSIGNACAO" ? 0 : saidasValidas.reduce((s, l) => s + l.quantidade * l.preco_unitario, 0);
       const { error } = await supabase
         .from("movimentacoes")
         .update({
           data: new Date(rest.data).toISOString(),
+          cliente_id: rest.cliente_id,
+          tipo: rest.tipo as "ENTREGA",
+          natureza: rest.natureza as "CONSIGNACAO",
+          valor_total: valorTotal,
           endereco_entrega: rest.endereco_entrega || null,
           complemento_entrega: rest.complemento_entrega || null,
           data_entrega_prevista: rest.data_entrega_prevista || null,
@@ -151,6 +194,35 @@ function HistoricoPage() {
         })
         .eq("id", id);
       if (error) throw error;
+
+      // Substitui os itens de barril (cheio/vazio); equipamentos são mantidos.
+      const { error: delErr } = await supabase
+        .from("movimentacao_itens")
+        .delete()
+        .eq("movimentacao_id", id)
+        .in("categoria", ["BARRIL_CHEIO", "BARRIL_VAZIO"]);
+      if (delErr) throw delErr;
+
+      const novosItens = [
+        ...saidasValidas.map((l) => ({
+          movimentacao_id: id,
+          categoria: "BARRIL_CHEIO",
+          produto_id: l.produto_id,
+          quantidade: l.quantidade,
+          preco_unitario: l.preco_unitario,
+        })),
+        ...retornosValidos.map((l) => ({
+          movimentacao_id: id,
+          categoria: "BARRIL_VAZIO",
+          produto_id: l.produto_id,
+          quantidade: l.quantidade,
+          preco_unitario: 0,
+        })),
+      ];
+      if (novosItens.length) {
+        const { error: insErr } = await supabase.from("movimentacao_itens").insert(novosItens as never);
+        if (insErr) throw insErr;
+      }
     },
     onSuccess: () => {
       toast.success("Movimentação atualizada");
@@ -159,6 +231,19 @@ function HistoricoPage() {
     },
     onError: (e: Error) => toast.error("Erro ao salvar: " + e.message),
   });
+
+  function atualizarLinhaEdit(setter: typeof setSaidasEdit, i: number, campo: keyof LinhaEdit, valor: string) {
+    setter((linhas) =>
+      linhas.map((l, idx) => {
+        if (idx !== i) return l;
+        if (campo === "produto_id") {
+          const p = produtos?.find((x) => x.id === valor);
+          return { ...l, produto_id: valor, preco_unitario: p ? Number(p.preco_barril) : l.preco_unitario };
+        }
+        return { ...l, [campo]: Number(valor.replace(",", ".")) || 0 };
+      }),
+    );
+  }
 
   const lista = (movs ?? []).filter(
     (m) => (!tipo || m.tipo === tipo) && (!clienteId || m.cliente_id === clienteId),
@@ -372,6 +457,7 @@ function HistoricoPage() {
         open={!!movEditar}
         onClose={() => setEditId(null)}
         title={`Editar romaneio #${movEditar?.numero ?? ""}`}
+        wide
       >
         {movEditar ? (
           <form
@@ -381,7 +467,11 @@ function HistoricoPage() {
                 toast.error("Informe a data/hora da movimentação");
                 return;
               }
-              salvarEdicao.mutate({ ...form, id: movEditar.id });
+              if (!form.cliente_id) {
+                toast.error("Escolha o cliente");
+                return;
+              }
+              salvarEdicao.mutate({ ...form, id: movEditar.id, saidas: saidasEdit, retornos: retornosEdit });
             }}
             className="space-y-4"
           >
@@ -393,6 +483,136 @@ function HistoricoPage() {
                 required
               />
             </Field>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Field label="Cliente">
+                <Select
+                  value={form.cliente_id}
+                  onChange={(e) => setForm((f) => ({ ...f, cliente_id: e.target.value }))}
+                  required
+                >
+                  <option value="">Selecione</option>
+                  {(clientes ?? []).map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Tipo">
+                <Select value={form.tipo} onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value }))}>
+                  {Object.entries(movTipoLabel).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Natureza">
+                <Select value={form.natureza} onChange={(e) => setForm((f) => ({ ...f, natureza: e.target.value }))}>
+                  {Object.entries(movNaturezaLabel).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+
+            <div className="rounded-lg border border-border p-3">
+              <p className="text-sm font-semibold">Saída — barris cheios</p>
+              {saidasEdit.map((l, i) => (
+                <div key={i} className="mt-2 grid grid-cols-[1fr_70px_90px_32px] items-center gap-2">
+                  <Select
+                    value={l.produto_id}
+                    onChange={(e) => atualizarLinhaEdit(setSaidasEdit, i, "produto_id", e.target.value)}
+                  >
+                    {(produtos ?? []).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nome} {num(p.volume_litros)}L
+                      </option>
+                    ))}
+                  </Select>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={l.quantidade}
+                    onChange={(e) => atualizarLinhaEdit(setSaidasEdit, i, "quantidade", e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={l.preco_unitario}
+                    onChange={(e) => atualizarLinhaEdit(setSaidasEdit, i, "preco_unitario", e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSaidasEdit((ls) => ls.filter((_, idx) => idx !== i))}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  const p = produtos?.[0];
+                  if (p)
+                    setSaidasEdit((ls) => [...ls, { produto_id: p.id, quantidade: 1, preco_unitario: Number(p.preco_barril) }]);
+                }}
+              >
+                + Adicionar barril cheio
+              </Button>
+            </div>
+
+            <div className="rounded-lg border border-border p-3">
+              <p className="text-sm font-semibold">Retorno — barris vazios</p>
+              {retornosEdit.map((l, i) => (
+                <div key={i} className="mt-2 grid grid-cols-[1fr_70px_32px] items-center gap-2">
+                  <Select
+                    value={l.produto_id}
+                    onChange={(e) => atualizarLinhaEdit(setRetornosEdit, i, "produto_id", e.target.value)}
+                  >
+                    {(produtos ?? []).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nome} {num(p.volume_litros)}L
+                      </option>
+                    ))}
+                  </Select>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={l.quantidade}
+                    onChange={(e) => atualizarLinhaEdit(setRetornosEdit, i, "quantidade", e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setRetornosEdit((ls) => ls.filter((_, idx) => idx !== i))}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  const p = produtos?.[0];
+                  if (p) setRetornosEdit((ls) => [...ls, { produto_id: p.id, quantidade: 1, preco_unitario: 0 }]);
+                }}
+              >
+                + Adicionar barril vazio
+              </Button>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Endereço de entrega">
                 <Input
