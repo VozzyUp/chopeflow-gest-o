@@ -169,8 +169,10 @@
   .ficha-via {
     display: block;
     padding: 7mm 11mm;
+    box-sizing: border-box;
+    height: 296mm;
+    overflow: hidden;
     page-break-after: always;
-    page-break-inside: avoid;
   }
 
   .ficha-via:last-child {
