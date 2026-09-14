@@ -457,6 +457,7 @@ function HistoricoPage() {
         open={!!movEditar}
         onClose={() => setEditId(null)}
         title={`Editar romaneio #${movEditar?.numero ?? ""}`}
+        wide
       >
         {movEditar ? (
           <form
