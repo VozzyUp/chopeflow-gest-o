@@ -10,7 +10,14 @@ export const Route = createFileRoute("/api/auth")({
           return Response.json({ error: "Banco MySQL não configurado" }, { status: 501 });
         }
 
-        let body: { action?: string; email?: string; senha?: string; nome?: string; token?: string };
+        let body: {
+          action?: string;
+          email?: string;
+          senha?: string;
+          nome?: string;
+          token?: string;
+          papel?: string;
+        };
         try {
           body = (await request.json()) as typeof body;
         } catch {
