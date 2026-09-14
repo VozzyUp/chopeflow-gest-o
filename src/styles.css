@@ -168,7 +168,7 @@
 
   .ficha-via {
     display: block;
-    padding: 9mm 12mm;
+    padding: 8mm 11mm;
     page-break-after: always;
     page-break-inside: avoid;
   }
@@ -220,8 +220,8 @@
     gap: 5mm;
     align-items: baseline;
     border: 0.5pt solid #999;
-    padding: 2.5mm 3mm;
-    margin-top: 5mm;
+    padding: 2mm 3mm;
+    margin-top: 4mm;
   }
 
   .ficha-natureza strong {
@@ -243,7 +243,7 @@
 
   .ficha-dados-col {
     flex: 1;
-    padding: 3mm;
+    padding: 2.5mm 3mm;
   }
 
   .ficha-dados-col + .ficha-dados-col {
@@ -252,7 +252,7 @@
   }
 
   .ficha-campo + .ficha-campo {
-    margin-top: 3mm;
+    margin-top: 2.2mm;
   }
 
   .ficha-campo-label {
@@ -271,7 +271,7 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin: 6mm 0 1.5mm;
+    margin: 4mm 0 1.5mm;
   }
 
   .ficha-secao-titulo h2 {
@@ -305,7 +305,7 @@
   }
 
   .ficha-tabela td {
-    padding: 2mm 1mm;
+    padding: 1.4mm 1mm;
     border-bottom: 0.5pt solid #ddd;
     vertical-align: top;
   }
@@ -352,7 +352,7 @@
   }
 
   .ficha-tabela-retorno td {
-    height: 8mm;
+    height: 6mm;
   }
 
   .ficha-linha-pontilhada {
@@ -396,7 +396,7 @@
   }
 
   .ficha-clausulas {
-    margin-top: 6mm;
+    margin-top: 4mm;
     border-top: 0.5pt solid #bbb;
     padding-top: 3mm;
     column-count: 3;
@@ -412,7 +412,7 @@
   .ficha-assinaturas {
     display: flex;
     gap: 10mm;
-    margin-top: 8mm;
+    margin-top: 6mm;
   }
 
   .ficha-assinaturas > div {
@@ -436,7 +436,7 @@
   .ficha-rodape {
     display: flex;
     justify-content: space-between;
-    margin-top: 6mm;
+    margin-top: 4mm;
     font-size: 8pt;
     color: #555;
   }
