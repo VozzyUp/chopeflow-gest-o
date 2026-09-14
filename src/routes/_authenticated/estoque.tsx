@@ -34,6 +34,7 @@ import {
   useSaldosCliente,
 } from "@/lib/data";
 import { estoquePorProduto } from "@/lib/estoque";
+import { excluirRegistro } from "@/lib/excluir";
 import { brl, dataBr, dataHoje, diasDesde, num } from "@/lib/format";
 import { barrilStatusLabel, chopeiraStatusLabel, cilindroStatusLabel, statusTone } from "@/lib/labels";
 
