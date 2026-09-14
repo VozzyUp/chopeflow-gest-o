@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/db/client";
 import { useClientes, type Cliente } from "@/lib/data";
+import { excluirRegistro } from "@/lib/excluir";
 import { brl, dataBr, inputDate } from "@/lib/format";
 import { clienteStatusLabel, clienteTipoLabel, condicaoPagamentoLabel, statusTone } from "@/lib/labels";
 
