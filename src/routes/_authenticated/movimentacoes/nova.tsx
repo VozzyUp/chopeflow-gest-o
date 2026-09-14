@@ -504,6 +504,7 @@ function NovaMovimentacaoPage() {
             <div className="mt-3 space-y-2">
               {saidas.map((l, i) => {
                 const disp = estoqueCheio.get(l.produto_id) ?? 0;
+                const prod = (produtos ?? []).find((p) => p.id === l.produto_id);
                 return (
                   <div key={i} className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
                     <Select
@@ -522,12 +523,19 @@ function NovaMovimentacaoPage() {
                       value={l.quantidade}
                       onChange={(e) => atualizarLinha(setSaidas, i, "quantidade", e.target.value)}
                     />
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={l.preco_unitario}
-                      onChange={(e) => atualizarLinha(setSaidas, i, "preco_unitario", e.target.value)}
-                    />
+                    <div>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={l.preco_unitario}
+                        onChange={(e) => atualizarLinha(setSaidas, i, "preco_unitario", e.target.value)}
+                      />
+                      {prod ? (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {brl(prod.preco_litro)}/L · total {brl(Number(l.quantidade) * Number(l.preco_unitario || 0))}
+                        </p>
+                      ) : null}
+                    </div>
                     <div className="flex items-center gap-2">
                       <Badge tone={l.quantidade > disp ? "danger" : "neutral"}>{disp} disp.</Badge>
                       <Button
