@@ -173,6 +173,29 @@ function EstoquePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const excluir = useMutation({
+    mutationFn: ({ tabela, id }: { tabela: string; id: string }) => excluirRegistro(tabela, id),
+    onSuccess: () => {
+      toast.success("Registro excluído");
+      queryClient.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  /** Botão de exclusão com confirmação, usado nas abas de ativos e entradas. */
+  const BotaoExcluir = ({ tabela, id, rotulo }: { tabela: string; id: string; rotulo: string }) => (
+    <Button
+      variant="ghost"
+      size="sm"
+      disabled={excluir.isPending}
+      onClick={() => {
+        if (confirm(`Excluir ${rotulo}? Essa ação não pode ser desfeita.`)) excluir.mutate({ tabela, id });
+      }}
+    >
+      Excluir
+    </Button>
+  );
+
   const b = barris ?? [];
   const listaBarris = b.filter(
     (x) => (!statusFiltro || x.status === statusFiltro) && (!produtoFiltro || x.produto_id === produtoFiltro),
