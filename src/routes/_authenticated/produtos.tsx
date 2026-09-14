@@ -158,7 +158,7 @@ function ProdutosPage() {
                         {cheios} / mín {p.estoque_minimo}
                       </Badge>
                     </Td>
-                    <Td>
+                    <Td className="whitespace-nowrap">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -169,6 +169,16 @@ function ProdutosPage() {
                         }}
                       >
                         Editar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={excluir.isPending}
+                        onClick={() => {
+                          if (confirm(`Excluir o chopp "${p.nome}"?`)) excluir.mutate(p.id);
+                        }}
+                      >
+                        Excluir
                       </Button>
                     </Td>
                   </tr>
