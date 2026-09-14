@@ -134,7 +134,8 @@ function NovaMovimentacaoPage() {
     (l) => l.produto_id && l.quantidade > (estoqueCheio.get(l.produto_id) ?? 0),
   );
 
-  const valorTotal = natureza === "CONSIGNACAO" ? 0 : saidas.reduce((s, l) => s + l.quantidade * l.preco_unitario, 0);
+  const valorEstimado = saidas.reduce((s, l) => s + l.quantidade * l.preco_unitario, 0);
+  const valorTotal = natureza === "CONSIGNACAO" ? 0 : valorEstimado;
   const limiteEstourado =
     cliente && Number(cliente.limite_credito) > 0 && emAberto + valorTotal > Number(cliente.limite_credito);
   const bloqueado = cliente?.status === "bloqueado";
@@ -726,7 +727,10 @@ function NovaMovimentacaoPage() {
               <p className="text-xs tracking-wide text-muted-foreground uppercase">Valor da operação</p>
               <p className="num-xl text-primary">{brl(valorTotal)}</p>
               {natureza === "CONSIGNACAO" ? (
-                <p className="text-xs text-muted-foreground">Consignação: receita apenas no acerto.</p>
+                <p className="text-xs text-muted-foreground">
+                  Consignação: cobrança no acerto. Valor estimado da mercadoria entregue:{" "}
+                  <strong className="text-foreground">{brl(valorEstimado)}</strong>.
+                </p>
               ) : null}
             </div>
             <Button type="submit" size="lg" disabled={salvar.isPending}>
