@@ -82,6 +82,15 @@ function ProdutosPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const excluir = useMutation({
+    mutationFn: (id: string) => excluirRegistro("produtos_chope", id),
+    onSuccess: () => {
+      toast.success("Chopp excluído");
+      queryClient.invalidateQueries({ queryKey: ["produtos"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const set = (k: string) => (e: { target: { value: string } }) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
