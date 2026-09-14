@@ -463,6 +463,9 @@ function EstoquePage() {
                       <Td className="font-semibold">{num(e.quantidade)}</Td>
                       <Td className="hidden sm:table-cell">{brl(e.custo_unitario)}</Td>
                       <Td className="hidden md:table-cell text-muted-foreground">{e.nota_fiscal ?? "—"}</Td>
+                      <Td>
+                        <BotaoExcluir tabela="movimentacao_estoque_chope" id={e.id} rotulo="esta entrada" />
+                      </Td>
                     </tr>
                   ))}
                 </tbody>
