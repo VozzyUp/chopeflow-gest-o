@@ -257,22 +257,9 @@ function HistoricoPage() {
                         <Button variant="ghost" size="sm" onClick={() => setAberta(aberta === m.id ? null : m.id)}>
                           Itens
                         </Button>
-                        {!m.estornada ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={estornar.isPending}
-                            onClick={() => {
-                              if (confirm("Estornar esta movimentação? Os barris voltam e o título é cancelado.")) {
-                                estornar.mutate(m.id);
-                              }
-                            }}
-                          >
-                            Estornar
-                          </Button>
-                        ) : (
-                          <Badge tone="danger">Estornada</Badge>
-                        )}
+                        <Button variant="ghost" size="sm" onClick={() => setEditId(m.id)}>
+                          Editar
+                        </Button>
                       </Td>
                     </tr>
                     {aberta === m.id ? (
