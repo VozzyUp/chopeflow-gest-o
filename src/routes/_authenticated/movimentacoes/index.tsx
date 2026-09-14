@@ -368,6 +368,96 @@ function HistoricoPage() {
         ) : null}
       </Modal>
 
+      <Modal
+        open={!!movEditar}
+        onClose={() => setEditId(null)}
+        title={`Editar romaneio #${movEditar?.numero ?? ""}`}
+      >
+        {movEditar ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!form.data) {
+                toast.error("Informe a data/hora da movimentação");
+                return;
+              }
+              salvarEdicao.mutate({ ...form, id: movEditar.id });
+            }}
+            className="space-y-4"
+          >
+            <Field label="Data e hora">
+              <Input
+                type="datetime-local"
+                value={form.data}
+                onChange={(e) => setForm((f) => ({ ...f, data: e.target.value }))}
+                required
+              />
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Endereço de entrega">
+                <Input
+                  value={form.endereco_entrega}
+                  onChange={(e) => setForm((f) => ({ ...f, endereco_entrega: e.target.value }))}
+                  placeholder="Rua, número, bairro"
+                />
+              </Field>
+              <Field label="Complemento">
+                <Input
+                  value={form.complemento_entrega}
+                  onChange={(e) => setForm((f) => ({ ...f, complemento_entrega: e.target.value }))}
+                  placeholder="Apto, bloco, referência"
+                />
+              </Field>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Data de entrega prevista">
+                <Input
+                  type="date"
+                  value={form.data_entrega_prevista}
+                  onChange={(e) => setForm((f) => ({ ...f, data_entrega_prevista: e.target.value }))}
+                />
+              </Field>
+              <Field label="Data de retirada prevista">
+                <Input
+                  type="date"
+                  value={form.data_retirada_prevista}
+                  onChange={(e) => setForm((f) => ({ ...f, data_retirada_prevista: e.target.value }))}
+                />
+              </Field>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Entregador / Responsável">
+                <Input
+                  value={form.responsavel}
+                  onChange={(e) => setForm((f) => ({ ...f, responsavel: e.target.value }))}
+                />
+              </Field>
+              <Field label="Recebido por">
+                <Input
+                  value={form.recebido_por}
+                  onChange={(e) => setForm((f) => ({ ...f, recebido_por: e.target.value }))}
+                />
+              </Field>
+            </div>
+            <Field label="Observação">
+              <Textarea
+                value={form.observacao}
+                onChange={(e) => setForm((f) => ({ ...f, observacao: e.target.value }))}
+                rows={3}
+              />
+            </Field>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setEditId(null)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={salvarEdicao.isPending}>
+                Salvar alterações
+              </Button>
+            </div>
+          </form>
+        ) : null}
+      </Modal>
+
       {dados ? <FichaPedidoPrint empresa={empresa ?? null} pedido={fichaDeMovimentacao(dados)} /> : null}
     </>
   );
