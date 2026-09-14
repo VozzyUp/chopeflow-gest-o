@@ -160,66 +160,129 @@
     left: 0;
     width: 100%;
     background: #fff;
-    color: #000;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11pt;
-    padding: 12mm 14mm;
-  }
-
-  .ficha hr {
-    border: 0;
-    border-top: 1px solid #000;
-    margin: 6mm 0;
-  }
-
-  .ficha-cabecalho {
-    text-align: center;
-    margin-bottom: 6mm;
-  }
-
-  .ficha-cabecalho h1 {
-    font-size: 15pt;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin: 0;
-  }
-
-  .ficha-cabecalho p {
-    margin: 1mm 0 0;
+    color: #111;
+    font-family: Helvetica, Arial, sans-serif;
     font-size: 9.5pt;
+    line-height: 1.35;
+  }
+
+  .ficha-via {
+    display: block;
+    padding: 12mm 13mm;
+    min-height: 273mm;
+    page-break-after: always;
+  }
+
+  .ficha-via:last-child {
+    page-break-after: auto;
+  }
+
+  .ficha-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2pt solid #111;
+    padding-bottom: 3mm;
+  }
+
+  .ficha-marca {
+    margin: 0;
+    font-size: 17pt;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .ficha-sub {
+    margin: 0.8mm 0 0;
+    font-size: 8.5pt;
+    color: #555;
+  }
+
+  .ficha-topo-direita {
+    text-align: right;
   }
 
   .ficha-numero {
+    margin: 0;
+    font-size: 24pt;
     font-weight: 700;
-    margin-top: 3mm !important;
+    line-height: 1;
   }
 
-  .ficha-linha {
+  .ficha-tipo {
+    margin: 1mm 0 0;
+    font-size: 9.5pt;
+    font-weight: 700;
+  }
+
+  .ficha-natureza {
     display: flex;
-    gap: 3mm;
+    gap: 5mm;
     align-items: baseline;
-    margin-bottom: 3.5mm;
+    border: 0.5pt solid #999;
+    padding: 2.5mm 3mm;
+    margin-top: 5mm;
   }
 
-  .ficha-label {
-    font-weight: 700;
+  .ficha-natureza strong {
+    font-size: 11pt;
+    color: #666;
     white-space: nowrap;
   }
 
-  .ficha-valor {
+  .ficha-natureza span {
+    font-size: 9pt;
+  }
+
+  .ficha-dados {
+    display: flex;
+    border: 0.5pt solid #bbb;
+    border-top: 0;
+    margin-top: 3mm;
+  }
+
+  .ficha-dados-col {
     flex: 1;
-    border-bottom: 1px solid #000;
+    padding: 3mm;
   }
 
-  .ficha-bloco-titulo {
+  .ficha-dados-col + .ficha-dados-col {
+    border-left: 0.5pt solid #bbb;
+    flex: 0 0 38%;
+  }
+
+  .ficha-campo + .ficha-campo {
+    margin-top: 3mm;
+  }
+
+  .ficha-campo-label {
+    display: block;
+    font-size: 8pt;
+    color: #666;
+  }
+
+  .ficha-campo-valor {
+    display: block;
+    font-size: 11pt;
     font-weight: 700;
-    margin: 4mm 0 1mm;
   }
 
-  .ficha-bloco-texto {
+  .ficha-secao-titulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 6mm 0 1.5mm;
+  }
+
+  .ficha-secao-titulo h2 {
     margin: 0;
-    border-bottom: 1px solid #000;
-    min-height: 6mm;
+    font-size: 12pt;
+    font-weight: 700;
+  }
+
+  .ficha-secao-titulo span {
+    font-size: 8.5pt;
+    color: #555;
   }
 
   .ficha-tabela {
@@ -227,34 +290,151 @@
     border-collapse: collapse;
   }
 
-  .ficha-tabela td {
-    border-bottom: 1px solid #000;
+  .ficha-tabela th {
+    font-size: 8pt;
+    font-weight: 400;
+    color: #555;
+    text-align: left;
+    border-top: 0.5pt solid #999;
+    border-bottom: 0.5pt solid #ddd;
     padding: 1.5mm 1mm;
+  }
+
+  .ficha-tabela td {
+    padding: 2mm 1mm;
+    border-bottom: 0.5pt solid #ddd;
     vertical-align: top;
   }
 
-  .ficha-td-direita {
+  .ficha-col-qtd {
+    width: 14mm;
+    text-align: center;
+  }
+
+  .ficha-col-ok {
+    width: 12mm;
+    text-align: center;
+  }
+
+  .ficha-qtd {
+    font-size: 12pt;
+    font-weight: 700;
+  }
+
+  .ficha-direita {
     text-align: right;
     white-space: nowrap;
   }
 
-  .ficha-total {
+  .ficha-forte {
     font-weight: 700;
+  }
+
+  .ficha-item-nome {
+    display: block;
+    font-size: 11pt;
+    font-weight: 700;
+  }
+
+  .ficha-item-detalhe {
+    display: block;
+    font-size: 8.5pt;
+    color: #555;
+  }
+
+  .ficha-vazio {
+    color: #555;
+    font-size: 9.5pt;
+  }
+
+  .ficha-tabela-retorno td {
+    height: 8mm;
+  }
+
+  .ficha-linha-pontilhada {
+    border-bottom: 0.5pt solid #ddd;
+  }
+
+  .ficha-box {
+    display: inline-block;
+    width: 4mm;
+    height: 4mm;
+    border: 0.8pt solid #111;
+  }
+
+  .ficha-fechamento {
+    margin-top: 7mm;
+    border-top: 2pt solid #111;
+    padding-top: 4mm;
+    margin-left: 40%;
+  }
+
+  .ficha-total-linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .ficha-total-linha strong {
     font-size: 12pt;
-    margin-top: 5mm;
   }
 
-  .ficha-termo {
-    font-size: 8pt;
-    text-align: justify;
-    margin-top: 4mm;
-    line-height: 1.35;
+  .ficha-total-valor {
+    font-size: 16pt;
+    font-weight: 700;
   }
 
-  .ficha-assinatura {
+  .ficha-observacao {
+    margin: 3mm 0 0;
+    font-size: 8.5pt;
+    border-left: 1.5pt solid #c88a2b;
+    padding-left: 2.5mm;
+  }
+
+  .ficha-clausulas {
     margin-top: 10mm;
+    border-top: 0.5pt solid #bbb;
+    padding-top: 3mm;
+    column-count: 3;
+    column-gap: 6mm;
+    font-size: 7.5pt;
+    text-align: justify;
+  }
+
+  .ficha-clausulas p {
+    margin: 0 0 2mm;
+  }
+
+  .ficha-assinaturas {
+    display: flex;
+    gap: 10mm;
+    margin-top: 12mm;
+  }
+
+  .ficha-assinaturas > div {
+    flex: 1;
+    border-top: 0.8pt solid #111;
+    padding-top: 1.5mm;
+  }
+
+  .ficha-assinatura-nome {
+    margin: 0;
     font-size: 10pt;
     font-weight: 700;
+  }
+
+  .ficha-assinatura-label {
+    margin: 0.8mm 0 0;
+    font-size: 8pt;
+    color: #555;
+  }
+
+  .ficha-rodape {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6mm;
+    font-size: 8pt;
+    color: #555;
   }
 
   @page {
