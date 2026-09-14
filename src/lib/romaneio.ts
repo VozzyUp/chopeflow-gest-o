@@ -32,38 +32,85 @@ export function equipamentosRomaneio(d: DadosRomaneio): string[] {
   });
 }
 
+/** Equipamentos entregues nesta visita, com série e valor de reposição. */
+function equipamentosFicha(d: DadosRomaneio) {
+  return d.itens.flatMap((i) => {
+    if (i.categoria === "CHOPEIRA_SAIDA") {
+      const c = d.chopeiras?.find((x) => x.id === i.chopeira_id);
+      return [
+        {
+          quantidade: 1,
+          nome: `Chopeira ${c?.codigo ?? "—"}${c?.marca_modelo ? ` · ${c.marca_modelo}` : ""}`,
+          serie: c?.numero_serie ?? null,
+          valor: c ? Number(c.valor_equipamento) : null,
+        },
+      ];
+    }
+    if (i.categoria === "CILINDRO_SAIDA") {
+      const c = d.cilindros?.find((x) => x.id === i.cilindro_id);
+      return [
+        {
+          quantidade: 1,
+          nome: `Cilindro ${c?.codigo ?? "—"}${c ? ` · ${c.tipo}` : ""}`,
+          serie: null,
+          valor: null,
+        },
+      ];
+    }
+    return [];
+  });
+}
+
 export function fichaDeMovimentacao(d: DadosRomaneio): FichaPedido {
   const { mov } = d;
   const saidas = d.itens.filter((i) => i.categoria === "BARRIL_CHEIO");
   const retornos = d.itens.filter((i) => i.categoria === "BARRIL_VAZIO");
+  const equipRetorno = d.itens.flatMap((i) => {
+    if (i.categoria === "CHOPEIRA_RETORNO")
+      return [{ quantidade: 1, item: `Chopeira ${d.chopeiras?.find((c) => c.id === i.chopeira_id)?.codigo ?? "—"}` }];
+    if (i.categoria === "CILINDRO_RETORNO")
+      return [{ quantidade: 1, item: `Cilindro ${d.cilindros?.find((c) => c.id === i.cilindro_id)?.codigo ?? "—"}` }];
+    return [];
+  });
+  const semCobranca = mov.natureza === "CONSIGNACAO" || mov.natureza === "COMODATO";
   return {
     numero: mov.numero,
+    tipoLabel: movTipoLabel[mov.tipo] ?? mov.tipo,
+    natureza: mov.natureza,
+    naturezaLabel: movNaturezaLabel[mov.natureza] ?? mov.natureza,
+    data: mov.data ?? null,
     cliente: d.cliente?.nome ?? "—",
     documento: d.cliente?.documento ?? null,
     telefone: d.cliente?.telefone ?? null,
     endereco: mov.endereco_entrega ?? d.cliente?.endereco ?? "",
     complemento: mov.complemento_entrega ?? null,
+    entregador: mov.responsavel ?? null,
     dataEntrega: mov.data_entrega_prevista ?? null,
     dataRetirada: mov.data_retirada_prevista ?? null,
-    servicoEntrega: `${movTipoLabel[mov.tipo] ?? mov.tipo} · ${movNaturezaLabel[mov.natureza] ?? mov.natureza}${
-      mov.responsavel ? ` · Entregador: ${mov.responsavel}` : ""
-    }`,
-    produtos: [
-      ...saidas.map((i) => {
-        const p = d.produtos?.find((x) => x.id === i.produto_id);
-        return {
-          descricao: `${rotuloProduto(d.produtos, i.produto_id)} ${num(p?.volume_litros ?? 0)}L (saída)`,
-          quantidade: Number(i.quantidade),
-          preco: Number(i.preco_unitario),
-        };
-      }),
-      ...retornos.map((i) => ({
-        descricao: `${rotuloProduto(d.produtos, i.produto_id)} — barril vazio (retorno)`,
+    mostrarSaida: saidas.length > 0 || mov.tipo === "ENTREGA" || mov.tipo === "VENDA_AVULSA" || mov.tipo === "TROCA",
+    mostrarRetorno:
+      retornos.length > 0 ||
+      equipRetorno.length > 0 ||
+      mov.tipo === "COLETA" ||
+      mov.tipo === "DEVOLUCAO" ||
+      mov.tipo === "TROCA",
+    saidas: saidas.map((i) => {
+      const p = d.produtos?.find((x) => x.id === i.produto_id);
+      return {
         quantidade: Number(i.quantidade),
-        preco: 0,
+        produto: rotuloProduto(d.produtos, i.produto_id),
+        detalhe: `Barril ${num(p?.volume_litros ?? 0)} L`,
+        precoUnitario: semCobranca ? null : Number(i.preco_unitario),
+      };
+    }),
+    equipamentos: equipamentosFicha(d),
+    retornos: [
+      ...retornos.map((i) => ({
+        quantidade: Number(i.quantidade),
+        item: `${rotuloProduto(d.produtos, i.produto_id)} — barril vazio`,
       })),
+      ...equipRetorno,
     ],
-    equipamentos: equipamentosRomaneio(d),
     valorTotal: Number(mov.valor_total ?? 0),
     informacoes: mov.observacao ?? null,
   };

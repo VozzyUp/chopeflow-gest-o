@@ -148,33 +148,77 @@ function NovaMovimentacaoPage() {
     cilindroRetorno ? `Cilindro ${cilindros?.find((c) => c.id === cilindroRetorno)?.codigo} (recolhido)` : null,
   ].filter((x): x is string => Boolean(x));
 
+  const semCobrancaFicha = natureza === "CONSIGNACAO" || natureza === "COMODATO";
   const ficha: FichaPedido = {
     numero: numeroRomaneio ?? 0,
+    tipoLabel: movTipoLabel[tipo] ?? tipo,
+    natureza,
+    naturezaLabel: movNaturezaLabel[natureza] ?? natureza,
+    data: new Date().toISOString(),
     cliente: cliente?.nome ?? "",
     documento: cliente?.documento ?? null,
     telefone: cliente?.telefone ?? null,
     endereco: enderecoUsado,
     complemento: outroEndereco ? complementoEntrega : null,
+    entregador: responsavel || null,
     dataEntrega: dataEntrega || null,
     dataRetirada: dataRetirada || null,
-    servicoEntrega: `${movTipoLabel[tipo] ?? tipo} · ${movNaturezaLabel[natureza] ?? natureza}${
-      responsavel ? ` · Entregador: ${responsavel}` : ""
-    }`,
-    produtos: [
-      ...saidas.map((l) => {
-        const p = produtos?.find((x) => x.id === l.produto_id);
-        return {
-          descricao: `${p?.nome ?? "Chopp"} ${num(p?.volume_litros ?? 0)}L (saída)`,
-          quantidade: l.quantidade,
-          preco: natureza === "CONSIGNACAO" ? 0 : l.preco_unitario,
-        };
-      }),
-      ...retornos.map((l) => {
-        const p = produtos?.find((x) => x.id === l.produto_id);
-        return { descricao: `${p?.nome ?? "Chopp"} — barril vazio (retorno)`, quantidade: l.quantidade, preco: 0 };
-      }),
+    mostrarSaida: saidas.length > 0 || tipo === "ENTREGA" || tipo === "VENDA_AVULSA" || tipo === "TROCA",
+    mostrarRetorno:
+      retornos.length > 0 ||
+      Boolean(chopeiraRetorno || cilindroRetorno) ||
+      tipo === "COLETA" ||
+      tipo === "DEVOLUCAO" ||
+      tipo === "TROCA",
+    saidas: saidas.map((l) => {
+      const p = produtos?.find((x) => x.id === l.produto_id);
+      return {
+        quantidade: l.quantidade,
+        produto: p?.nome ?? "Chopp",
+        detalhe: `Barril ${num(p?.volume_litros ?? 0)} L`,
+        precoUnitario: semCobrancaFicha ? null : l.preco_unitario,
+      };
+    }),
+    equipamentos: [
+      ...(chopeiraSaida
+        ? (() => {
+            const c = chopeiras?.find((x) => x.id === chopeiraSaida);
+            return [
+              {
+                quantidade: 1,
+                nome: `Chopeira ${c?.codigo ?? "—"}${c?.marca_modelo ? ` · ${c.marca_modelo}` : ""}`,
+                serie: c?.numero_serie ?? null,
+                valor: c ? Number(c.valor_equipamento) : null,
+              },
+            ];
+          })()
+        : []),
+      ...(cilindroSaida
+        ? (() => {
+            const c = cilindros?.find((x) => x.id === cilindroSaida);
+            return [
+              {
+                quantidade: 1,
+                nome: `Cilindro ${c?.codigo ?? "—"}${c ? ` · ${c.tipo}` : ""}`,
+                serie: null,
+                valor: null,
+              },
+            ];
+          })()
+        : []),
     ],
-    equipamentos: equipamentosTexto,
+    retornos: [
+      ...retornos.map((l) => ({
+        quantidade: l.quantidade,
+        item: `${produtos?.find((x) => x.id === l.produto_id)?.nome ?? "Chopp"} — barril vazio`,
+      })),
+      ...(chopeiraRetorno
+        ? [{ quantidade: 1, item: `Chopeira ${chopeiras?.find((c) => c.id === chopeiraRetorno)?.codigo ?? "—"}` }]
+        : []),
+      ...(cilindroRetorno
+        ? [{ quantidade: 1, item: `Cilindro ${cilindros?.find((c) => c.id === cilindroRetorno)?.codigo ?? "—"}` }]
+        : []),
+    ],
     valorTotal,
     informacoes: observacao || null,
   };
