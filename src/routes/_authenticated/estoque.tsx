@@ -304,6 +304,9 @@ function EstoquePage() {
                           ))}
                         </Select>
                       </Td>
+                      <Td>
+                        <BotaoExcluir tabela="barris" id={x.id} rotulo={`o barril ${x.codigo}`} />
+                      </Td>
                     </tr>
                   ))}
                 </tbody>
