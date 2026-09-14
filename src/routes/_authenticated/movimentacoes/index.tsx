@@ -466,7 +466,11 @@ function HistoricoPage() {
                 toast.error("Informe a data/hora da movimentação");
                 return;
               }
-              salvarEdicao.mutate({ ...form, id: movEditar.id });
+              if (!form.cliente_id) {
+                toast.error("Escolha o cliente");
+                return;
+              }
+              salvarEdicao.mutate({ ...form, id: movEditar.id, saidas: saidasEdit, retornos: retornosEdit });
             }}
             className="space-y-4"
           >
@@ -478,6 +482,136 @@ function HistoricoPage() {
                 required
               />
             </Field>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Field label="Cliente">
+                <Select
+                  value={form.cliente_id}
+                  onChange={(e) => setForm((f) => ({ ...f, cliente_id: e.target.value }))}
+                  required
+                >
+                  <option value="">Selecione</option>
+                  {(clientes ?? []).map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Tipo">
+                <Select value={form.tipo} onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value }))}>
+                  {Object.entries(movTipoLabel).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Natureza">
+                <Select value={form.natureza} onChange={(e) => setForm((f) => ({ ...f, natureza: e.target.value }))}>
+                  {Object.entries(movNaturezaLabel).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+
+            <div className="rounded-lg border border-border p-3">
+              <p className="text-sm font-semibold">Saída — barris cheios</p>
+              {saidasEdit.map((l, i) => (
+                <div key={i} className="mt-2 grid grid-cols-[1fr_70px_90px_32px] items-center gap-2">
+                  <Select
+                    value={l.produto_id}
+                    onChange={(e) => atualizarLinhaEdit(setSaidasEdit, i, "produto_id", e.target.value)}
+                  >
+                    {(produtos ?? []).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nome} {num(p.volume_litros)}L
+                      </option>
+                    ))}
+                  </Select>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={l.quantidade}
+                    onChange={(e) => atualizarLinhaEdit(setSaidasEdit, i, "quantidade", e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={l.preco_unitario}
+                    onChange={(e) => atualizarLinhaEdit(setSaidasEdit, i, "preco_unitario", e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSaidasEdit((ls) => ls.filter((_, idx) => idx !== i))}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  const p = produtos?.[0];
+                  if (p)
+                    setSaidasEdit((ls) => [...ls, { produto_id: p.id, quantidade: 1, preco_unitario: Number(p.preco_barril) }]);
+                }}
+              >
+                + Adicionar barril cheio
+              </Button>
+            </div>
+
+            <div className="rounded-lg border border-border p-3">
+              <p className="text-sm font-semibold">Retorno — barris vazios</p>
+              {retornosEdit.map((l, i) => (
+                <div key={i} className="mt-2 grid grid-cols-[1fr_70px_32px] items-center gap-2">
+                  <Select
+                    value={l.produto_id}
+                    onChange={(e) => atualizarLinhaEdit(setRetornosEdit, i, "produto_id", e.target.value)}
+                  >
+                    {(produtos ?? []).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nome} {num(p.volume_litros)}L
+                      </option>
+                    ))}
+                  </Select>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={l.quantidade}
+                    onChange={(e) => atualizarLinhaEdit(setRetornosEdit, i, "quantidade", e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setRetornosEdit((ls) => ls.filter((_, idx) => idx !== i))}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  const p = produtos?.[0];
+                  if (p) setRetornosEdit((ls) => [...ls, { produto_id: p.id, quantidade: 1, preco_unitario: 0 }]);
+                }}
+              >
+                + Adicionar barril vazio
+              </Button>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Endereço de entrega">
                 <Input
