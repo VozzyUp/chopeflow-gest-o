@@ -68,18 +68,34 @@ function FinanceiroPage() {
       if (!conta) throw new Error("Título inválido");
       if (valor <= 0) throw new Error("Informe o valor recebido");
       if (conta.status === "PAGO") throw new Error("Este título já está quitado");
-      // O trigger aplica GREATEST(valor_total - valor_pago, 0): o excedente sumia sem registro.
-      const saldoTitulo = Number(conta.saldo ?? 0);
-      if (valor > saldoTitulo) {
+      // Saldo derivado do título: o campo "saldo" fica 0 quando o banco não tem os triggers.
+      const saldoTitulo = saldoConta(conta);
+      if (valor > saldoTitulo + 0.005) {
         throw new Error(`Valor acima do saldo do título (${brl(saldoTitulo)}).`);
       }
+      const hoje = dataHoje();
       const { error } = await supabase.from("pagamentos").insert({
         conta_id: conta.id,
         valor,
         forma,
-        data: dataHoje(),
+        data: hoje,
       });
       if (error) throw error;
+
+      // Reaplica o total pago no título (garante o acerto mesmo sem triggers no banco).
+      const pago = Number(conta.valor_pago ?? 0) + valor;
+      const total = Number(conta.valor_total ?? 0);
+      const restante = Math.max(total - pago, 0);
+      const { error: upErr } = await supabase
+        .from("contas_receber")
+        .update({
+          valor_pago: pago,
+          saldo: restante,
+          data_pagamento: hoje,
+          status: restante <= 0.005 ? "PAGO" : "PARCIAL",
+        })
+        .eq("id", conta.id);
+      if (upErr) throw upErr;
     },
     onSuccess: () => {
       toast.success("Pagamento registrado");
