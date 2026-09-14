@@ -180,7 +180,7 @@ function ConfiguracoesPage() {
         </Table>
         <p className="mt-3 text-xs text-muted-foreground">
           Perfis disponíveis: Administrador (acesso total), Operacional/Entregador (romaneios e estoque) e Financeiro
-          (contas e acertos). Novos usuários entram criando conta na tela de login; o primeiro recebe Administrador.
+          (contas e acertos). Para criar usuários e alterar perfis, use a tela <strong>Usuários</strong>.
         </p>
       </Card>
     </>
