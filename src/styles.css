@@ -168,7 +168,7 @@
 
   .ficha-via {
     display: block;
-    padding: 8mm 11mm;
+    padding: 7mm 11mm;
     page-break-after: always;
     page-break-inside: avoid;
   }
@@ -401,7 +401,7 @@
     padding-top: 3mm;
     column-count: 3;
     column-gap: 6mm;
-    font-size: 7.5pt;
+    font-size: 7.2pt;
     text-align: justify;
   }
 
@@ -412,7 +412,7 @@
   .ficha-assinaturas {
     display: flex;
     gap: 10mm;
-    margin-top: 6mm;
+    margin-top: 5mm;
   }
 
   .ficha-assinaturas > div {
