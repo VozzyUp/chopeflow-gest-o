@@ -210,9 +210,21 @@ function ClientesPage() {
                   <Td>
                     <Badge tone={statusTone(c.status)}>{clienteStatusLabel[c.status]}</Badge>
                   </Td>
-                  <Td>
+                  <Td className="whitespace-nowrap">
                     <Button variant="ghost" size="sm" onClick={() => abrirEdicao(c)}>
                       Editar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={excluir.isPending}
+                      onClick={() => {
+                        if (confirm(`Excluir o cliente "${c.nome}"? Essa ação não pode ser desfeita.`)) {
+                          excluir.mutate(c.id);
+                        }
+                      }}
+                    >
+                      Excluir
                     </Button>
                   </Td>
                 </tr>
