@@ -330,6 +330,7 @@ function EstoquePage() {
                 <Th className="hidden md:table-cell">Desde</Th>
                 <Th className="hidden lg:table-cell">Valor</Th>
                 <Th className="hidden lg:table-cell">Próx. higienização</Th>
+                <Th />
               </tr>
             </thead>
             <tbody>
