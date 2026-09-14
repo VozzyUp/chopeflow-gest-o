@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/db/client";
 import { useBarris, useProdutos, type Produto } from "@/lib/data";
+import { excluirRegistro } from "@/lib/excluir";
 import { brl, num } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/produtos")({
@@ -77,6 +78,15 @@ function ProdutosPage() {
       setModal(false);
       setEditando(null);
       setForm(vazio);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const excluir = useMutation({
+    mutationFn: (id: string) => excluirRegistro("produtos_chope", id),
+    onSuccess: () => {
+      toast.success("Chopp excluído");
+      queryClient.invalidateQueries({ queryKey: ["produtos"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -148,7 +158,7 @@ function ProdutosPage() {
                         {cheios} / mín {p.estoque_minimo}
                       </Badge>
                     </Td>
-                    <Td>
+                    <Td className="whitespace-nowrap">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -159,6 +169,16 @@ function ProdutosPage() {
                         }}
                       >
                         Editar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={excluir.isPending}
+                        onClick={() => {
+                          if (confirm(`Excluir o chopp "${p.nome}"?`)) excluir.mutate(p.id);
+                        }}
+                      >
+                        Excluir
                       </Button>
                     </Td>
                   </tr>

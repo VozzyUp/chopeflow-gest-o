@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/db/client";
 import { useClientes, type Cliente } from "@/lib/data";
+import { excluirRegistro } from "@/lib/excluir";
 import { brl, dataBr, inputDate } from "@/lib/format";
 import { clienteStatusLabel, clienteTipoLabel, condicaoPagamentoLabel, statusTone } from "@/lib/labels";
 
@@ -85,6 +86,15 @@ function ClientesPage() {
       setModal(false);
       setEditando(null);
       setForm(vazio);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const excluir = useMutation({
+    mutationFn: (id: string) => excluirRegistro("clientes", id),
+    onSuccess: () => {
+      toast.success("Cliente excluído");
+      queryClient.invalidateQueries({ queryKey: ["clientes"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -210,9 +220,21 @@ function ClientesPage() {
                   <Td>
                     <Badge tone={statusTone(c.status)}>{clienteStatusLabel[c.status]}</Badge>
                   </Td>
-                  <Td>
+                  <Td className="whitespace-nowrap">
                     <Button variant="ghost" size="sm" onClick={() => abrirEdicao(c)}>
                       Editar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={excluir.isPending}
+                      onClick={() => {
+                        if (confirm(`Excluir o cliente "${c.nome}"? Essa ação não pode ser desfeita.`)) {
+                          excluir.mutate(c.id);
+                        }
+                      }}
+                    >
+                      Excluir
                     </Button>
                   </Td>
                 </tr>

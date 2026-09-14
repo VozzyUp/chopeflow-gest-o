@@ -34,6 +34,7 @@ import {
   useSaldosCliente,
 } from "@/lib/data";
 import { estoquePorProduto } from "@/lib/estoque";
+import { excluirRegistro } from "@/lib/excluir";
 import { brl, dataBr, dataHoje, diasDesde, num } from "@/lib/format";
 import { barrilStatusLabel, chopeiraStatusLabel, cilindroStatusLabel, statusTone } from "@/lib/labels";
 
@@ -173,6 +174,29 @@ function EstoquePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const excluir = useMutation({
+    mutationFn: ({ tabela, id }: { tabela: string; id: string }) => excluirRegistro(tabela, id),
+    onSuccess: () => {
+      toast.success("Registro excluído");
+      queryClient.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  /** Botão de exclusão com confirmação, usado nas abas de ativos e entradas. */
+  const BotaoExcluir = ({ tabela, id, rotulo }: { tabela: string; id: string; rotulo: string }) => (
+    <Button
+      variant="ghost"
+      size="sm"
+      disabled={excluir.isPending}
+      onClick={() => {
+        if (confirm(`Excluir ${rotulo}? Essa ação não pode ser desfeita.`)) excluir.mutate({ tabela, id });
+      }}
+    >
+      Excluir
+    </Button>
+  );
+
   const b = barris ?? [];
   const listaBarris = b.filter(
     (x) => (!statusFiltro || x.status === statusFiltro) && (!produtoFiltro || x.produto_id === produtoFiltro),
@@ -249,6 +273,7 @@ function EstoquePage() {
                     <Th className="hidden sm:table-cell">Dias</Th>
                     <Th className="hidden lg:table-cell">Ciclos</Th>
                     <Th>Mover para</Th>
+                    <Th />
                   </tr>
                 </thead>
                 <tbody>
@@ -279,6 +304,9 @@ function EstoquePage() {
                           ))}
                         </Select>
                       </Td>
+                      <Td>
+                        <BotaoExcluir tabela="barris" id={x.id} rotulo={`o barril ${x.codigo}`} />
+                      </Td>
                     </tr>
                   ))}
                 </tbody>
@@ -302,6 +330,7 @@ function EstoquePage() {
                 <Th className="hidden md:table-cell">Desde</Th>
                 <Th className="hidden lg:table-cell">Valor</Th>
                 <Th className="hidden lg:table-cell">Próx. higienização</Th>
+                <Th />
               </tr>
             </thead>
             <tbody>
@@ -324,6 +353,9 @@ function EstoquePage() {
                     <Td className="hidden lg:table-cell">
                       <Badge tone={vencida ? "danger" : "success"}>{dataBr(c.proxima_higienizacao)}</Badge>
                     </Td>
+                    <Td>
+                      <BotaoExcluir tabela="chopeiras" id={c.id} rotulo={`a chopeira ${c.codigo}`} />
+                    </Td>
                   </tr>
                 );
               })}
@@ -343,6 +375,7 @@ function EstoquePage() {
                 <Th>Status</Th>
                 <Th>Cliente</Th>
                 <Th>Desde</Th>
+                <Th />
               </tr>
             </thead>
             <tbody>
@@ -356,6 +389,9 @@ function EstoquePage() {
                   </Td>
                   <Td>{c.cliente_id ? nomeCliente(clientes, c.cliente_id) : "Depósito"}</Td>
                   <Td>{dataBr(c.data_saida)}</Td>
+                  <Td>
+                    <BotaoExcluir tabela="cilindros" id={c.id} rotulo={`o cilindro ${c.codigo}`} />
+                  </Td>
                 </tr>
               ))}
             </tbody>
@@ -416,6 +452,7 @@ function EstoquePage() {
                     <Th>Barris</Th>
                     <Th className="hidden sm:table-cell">Custo unit.</Th>
                     <Th className="hidden md:table-cell">Nota fiscal</Th>
+                    <Th />
                   </tr>
                 </thead>
                 <tbody>
@@ -426,6 +463,9 @@ function EstoquePage() {
                       <Td className="font-semibold">{num(e.quantidade)}</Td>
                       <Td className="hidden sm:table-cell">{brl(e.custo_unitario)}</Td>
                       <Td className="hidden md:table-cell text-muted-foreground">{e.nota_fiscal ?? "—"}</Td>
+                      <Td>
+                        <BotaoExcluir tabela="movimentacao_estoque_chope" id={e.id} rotulo="esta entrada" />
+                      </Td>
                     </tr>
                   ))}
                 </tbody>
