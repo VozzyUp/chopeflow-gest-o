@@ -3,12 +3,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
 
+import { FichaPedidoPrint } from "@/components/ficha-pedido";
 import {
   Badge,
   Button,
   Card,
   EmptyState,
   Field,
+  Modal,
   PageHead,
   Select,
   Table,
@@ -18,7 +20,10 @@ import {
 import {
   nomeCliente,
   nomeProduto,
+  useChopeiras,
+  useCilindros,
   useClientes,
+  useEmpresa,
   useMovimentacaoItens,
   useMovimentacoes,
   useProdutos,
@@ -27,6 +32,7 @@ import { supabase } from "@/integrations/db/client";
 import { brl, dataBr, dataHoraBr, num } from "@/lib/format";
 import { movNaturezaLabel, movTipoLabel } from "@/lib/labels";
 import { estornarMovimentacao, urlFotoMovimentacao } from "@/lib/movimentacao";
+import { fichaDeMovimentacao, textoRomaneio, whatsappRomaneio, type DadosRomaneio } from "@/lib/romaneio";
 
 /** Fotos da entrega/instalação anexadas ao romaneio. */
 function FotosRomaneio({ movimentacaoId }: { movimentacaoId: string }) {
@@ -71,10 +77,14 @@ function HistoricoPage() {
   const { data: itens } = useMovimentacaoItens();
   const { data: clientes } = useClientes();
   const { data: produtos } = useProdutos();
+  const { data: chopeiras } = useChopeiras();
+  const { data: cilindros } = useCilindros();
+  const { data: empresa } = useEmpresa();
   const queryClient = useQueryClient();
   const [tipo, setTipo] = useState("");
   const [clienteId, setClienteId] = useState("");
   const [aberta, setAberta] = useState<string | null>(null);
+  const [verId, setVerId] = useState<string | null>(null);
 
   const estornar = useMutation({
     mutationFn: (id: string) => estornarMovimentacao(id),
@@ -88,6 +98,20 @@ function HistoricoPage() {
   const lista = (movs ?? []).filter(
     (m) => (!tipo || m.tipo === tipo) && (!clienteId || m.cliente_id === clienteId),
   );
+
+  const movVer = (movs ?? []).find((m) => m.id === verId);
+  const dados: DadosRomaneio | null = movVer
+    ? {
+        mov: movVer,
+        itens: (itens ?? []).filter((i) => i.movimentacao_id === movVer.id),
+        cliente: clientes?.find((c) => c.id === movVer.cliente_id),
+        produtos,
+        chopeiras,
+        cilindros,
+        empresaNome: empresa?.nome,
+      }
+    : null;
+  const texto = dados ? textoRomaneio(dados) : "";
 
   return (
     <>
@@ -162,6 +186,9 @@ function HistoricoPage() {
                       </Td>
                       <Td>{brl(m.valor_total)}</Td>
                       <Td className="whitespace-nowrap">
+                        <Button variant="ghost" size="sm" onClick={() => setVerId(m.id)}>
+                          Visualizar
+                        </Button>
                         <Button variant="ghost" size="sm" onClick={() => setAberta(aberta === m.id ? null : m.id)}>
                           Itens
                         </Button>
@@ -224,6 +251,72 @@ function HistoricoPage() {
           </Table>
         )}
       </Card>
+
+      <Modal
+        open={dados !== null}
+        onClose={() => setVerId(null)}
+        title={`Romaneio #${movVer?.numero ?? ""}`}
+        wide
+      >
+        {dados ? (
+          <>
+            <div className="grid gap-2 text-sm sm:grid-cols-2">
+              <p>
+                <span className="text-muted-foreground">Cliente:</span> {dados.cliente?.nome ?? "—"}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Data:</span> {dataHoraBr(dados.mov.data)}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Operação:</span>{" "}
+                {movTipoLabel[dados.mov.tipo] ?? dados.mov.tipo} · {movNaturezaLabel[dados.mov.natureza]}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Valor:</span> {brl(dados.mov.valor_total)}
+              </p>
+              {dados.mov.responsavel ? (
+                <p>
+                  <span className="text-muted-foreground">Entregador:</span> {dados.mov.responsavel}
+                </p>
+              ) : null}
+              {dados.mov.recebido_por ? (
+                <p>
+                  <span className="text-muted-foreground">Recebido por:</span> {dados.mov.recebido_por}
+                </p>
+              ) : null}
+            </div>
+
+            <pre className="mt-4 max-h-72 overflow-auto rounded-lg bg-background/70 p-4 text-sm whitespace-pre-wrap">
+              {texto}
+            </pre>
+
+            <FotosRomaneio movimentacaoId={dados.mov.id} />
+
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard?.writeText(texto);
+                  toast.success("Texto copiado");
+                }}
+              >
+                Copiar texto
+              </Button>
+              <a
+                className="inline-flex h-11 items-center rounded-lg bg-success px-4 text-sm font-semibold text-success-foreground"
+                href={whatsappRomaneio(dados.cliente?.telefone, texto)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Reenviar no WhatsApp
+              </a>
+              <Button onClick={() => window.print()}>Reimprimir ficha (PDF)</Button>
+            </div>
+          </>
+        ) : null}
+      </Modal>
+
+      {dados ? <FichaPedidoPrint empresa={empresa ?? null} pedido={fichaDeMovimentacao(dados)} /> : null}
     </>
   );
 }
