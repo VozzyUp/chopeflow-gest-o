@@ -389,6 +389,9 @@ function EstoquePage() {
                   </Td>
                   <Td>{c.cliente_id ? nomeCliente(clientes, c.cliente_id) : "Depósito"}</Td>
                   <Td>{dataBr(c.data_saida)}</Td>
+                  <Td>
+                    <BotaoExcluir tabela="cilindros" id={c.id} rotulo={`o cilindro ${c.codigo}`} />
+                  </Td>
                 </tr>
               ))}
             </tbody>
