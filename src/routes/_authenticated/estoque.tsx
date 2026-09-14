@@ -452,6 +452,7 @@ function EstoquePage() {
                     <Th>Barris</Th>
                     <Th className="hidden sm:table-cell">Custo unit.</Th>
                     <Th className="hidden md:table-cell">Nota fiscal</Th>
+                    <Th />
                   </tr>
                 </thead>
                 <tbody>
