@@ -10,7 +10,15 @@ export const Route = createFileRoute("/api/auth")({
           return Response.json({ error: "Banco MySQL não configurado" }, { status: 501 });
         }
 
-        let body: { action?: string; email?: string; senha?: string; nome?: string; token?: string; codigo?: string };
+        let body: {
+          action?: string;
+          email?: string;
+          senha?: string;
+          nome?: string;
+          token?: string;
+          codigo?: string;
+          papel?: string;
+        };
         try {
           body = (await request.json()) as typeof body;
         } catch {
@@ -79,6 +87,44 @@ export const Route = createFileRoute("/api/auth")({
               [dados.sub],
             );
             return Response.json({ user: usuarios[0] ?? null });
+          }
+
+          if (body.action === "admin-create") {
+            const solicitante = mod.usuarioDaRequisicao(request);
+            if (!solicitante) return Response.json({ error: "Não autenticado" }, { status: 401 });
+            const admin = await mod.sqlRows<{ total: number }>(
+              "SELECT COUNT(*) AS total FROM user_roles WHERE user_id = ? AND role = 'admin'",
+              [solicitante.sub],
+            );
+            if (Number(admin[0]?.total ?? 0) === 0) {
+              return Response.json({ error: "Apenas administradores podem criar usuários" }, { status: 403 });
+            }
+
+            const papel = body.papel ?? "";
+            if (!["admin", "operacional", "financeiro"].includes(papel)) {
+              return Response.json({ error: "Perfil inválido" }, { status: 400 });
+            }
+            if (!email.includes("@") || senha.length < 6) {
+              return Response.json({ error: "Informe e-mail válido e senha com pelo menos 6 caracteres" }, { status: 400 });
+            }
+            const existentes = await mod.sqlRows<{ id: string }>("SELECT id FROM app_users WHERE email = ?", [email]);
+            if (existentes.length) return Response.json({ error: "E-mail já cadastrado" }, { status: 409 });
+
+            const id = crypto.randomUUID();
+            const nome = (body.nome ?? "").trim() || email.split("@")[0];
+            await mod.sqlRun("INSERT INTO app_users (id, email, senha_hash, nome) VALUES (?, ?, ?, ?)", [
+              id,
+              email,
+              mod.hashSenha(senha),
+              nome,
+            ]);
+            await mod.sqlRun("INSERT INTO profiles (id, nome, email) VALUES (?, ?, ?)", [id, nome, email]);
+            await mod.sqlRun("INSERT INTO user_roles (id, user_id, role) VALUES (?, ?, ?)", [
+              crypto.randomUUID(),
+              id,
+              papel,
+            ]);
+            return Response.json({ id });
           }
 
           return Response.json({ error: "Ação desconhecida" }, { status: 400 });
