@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/db/client";
 import { useBarris, useProdutos, type Produto } from "@/lib/data";
+import { excluirRegistro } from "@/lib/excluir";
 import { brl, num } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/produtos")({
