@@ -375,6 +375,7 @@ function EstoquePage() {
                 <Th>Status</Th>
                 <Th>Cliente</Th>
                 <Th>Desde</Th>
+                <Th />
               </tr>
             </thead>
             <tbody>
