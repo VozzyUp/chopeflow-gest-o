@@ -353,6 +353,9 @@ function EstoquePage() {
                     <Td className="hidden lg:table-cell">
                       <Badge tone={vencida ? "danger" : "success"}>{dataBr(c.proxima_higienizacao)}</Badge>
                     </Td>
+                    <Td>
+                      <BotaoExcluir tabela="chopeiras" id={c.id} rotulo={`a chopeira ${c.codigo}`} />
+                    </Td>
                   </tr>
                 );
               })}
