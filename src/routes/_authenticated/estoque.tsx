@@ -273,6 +273,7 @@ function EstoquePage() {
                     <Th className="hidden sm:table-cell">Dias</Th>
                     <Th className="hidden lg:table-cell">Ciclos</Th>
                     <Th>Mover para</Th>
+                    <Th />
                   </tr>
                 </thead>
                 <tbody>
