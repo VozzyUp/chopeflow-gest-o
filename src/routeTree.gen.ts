@@ -20,6 +20,7 @@ import { Route as AuthenticatedEventosRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
 import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticated/produtos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
+import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as ApiAuthRouteImport } from './routes/api/auth'
 import { Route as ApiDbRouteImport } from './routes/api/db'
 import { Route as ApiStorageRouteImport } from './routes/api/storage'
@@ -84,6 +85,11 @@ const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiAuthRoute = ApiAuthRouteImport.update({
   id: '/api/auth',
   path: '/api/auth',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/usuarios': typeof AuthenticatedUsuariosRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
   '/api/storage': typeof ApiStorageRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/usuarios': typeof AuthenticatedUsuariosRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
   '/api/storage': typeof ApiStorageRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/produtos': typeof AuthenticatedProdutosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/api/auth': typeof ApiAuthRoute
   '/api/db': typeof ApiDbRoute
   '/api/storage': typeof ApiStorageRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/produtos'
     | '/relatorios'
+    | '/usuarios'
     | '/api/auth'
     | '/api/db'
     | '/api/storage'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/produtos'
     | '/relatorios'
+    | '/usuarios'
     | '/api/auth'
     | '/api/db'
     | '/api/storage'
@@ -234,6 +245,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financeiro'
     | '/_authenticated/produtos'
     | '/_authenticated/relatorios'
+    | '/_authenticated/usuarios'
     | '/api/auth'
     | '/api/db'
     | '/api/storage'
@@ -331,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/usuarios': {
+      id: '/_authenticated/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/auth': {
       id: '/api/auth'
       path: '/api/auth'
@@ -392,6 +411,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedProdutosRoute: typeof AuthenticatedProdutosRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
+  AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedMovimentacoesNovaRoute: typeof AuthenticatedMovimentacoesNovaRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
@@ -407,6 +427,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedProdutosRoute: AuthenticatedProdutosRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
+  AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedMovimentacoesNovaRoute: AuthenticatedMovimentacoesNovaRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,

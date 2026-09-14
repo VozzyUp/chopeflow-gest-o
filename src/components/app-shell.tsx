@@ -11,14 +11,16 @@ import {
   LogOut,
   Menu,
   Package,
+  ShieldCheck,
   Users,
   Wallet,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/primitives";
+import { Button, EmptyState, PageHead } from "@/components/ui/primitives";
 import { supabase } from "@/integrations/db/client";
+import { podeAcessar, usePapeis } from "@/lib/permissoes";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -32,6 +34,7 @@ const nav = [
   { to: "/consignacoes", label: "Consignação e acertos", icon: Handshake },
   { to: "/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
+  { to: "/usuarios", label: "Usuários", icon: ShieldCheck },
   { to: "/configuracoes", label: "Configurações", icon: Cog },
 ] as const;
 
@@ -40,6 +43,10 @@ export function AppShell() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { data: papeis, isPending: carregandoPapeis } = usePapeis();
+  const meusPapeis = papeis ?? [];
+  const itensVisiveis = carregandoPapeis ? [] : nav.filter((item) => podeAcessar(meusPapeis, item.to));
+  const liberado = carregandoPapeis || podeAcessar(meusPapeis, pathname);
 
   useEffect(() => {
     setAberto(false);
